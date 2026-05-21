@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tiên House - Phụ Kiện Xinh, Ốp Lưng & Quà Lưu Niệm</title>
-  <meta name="description" content="Tiên House - Chuyên phụ kiện xinh, ốp lưng, móc khoá và quà lưu niệm dễ thương. Tiện lợi mỗi ngày. Chợ Mỹ Luông, An Giang.">
+  <title>Fairy House - Phụ Kiện Xinh & Quà Lưu Niệm Dễ Thương</title>
+  <meta name="description" content="Fairy House - Chuyên phụ kiện xinh, móc khoá trend và quà lưu niệm dễ thương. Tiện lợi mỗi ngày. Chợ Mỹ Luông, An Giang.">
   <link rel="stylesheet" href="style.css">
   <!-- FontAwesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,29 +20,42 @@
 
   <!-- Header -->
   <header class="header">
-    <div class="header-top">
-      <a href="#" class="logo" id="logo">
-        <img src="logo.jpg" alt="Tiên House Logo" class="logo-img" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📱</text></svg>'">
-        <div class="logo-text">
-          <h1>Tiên House</h1>
-          <span>✨ Phụ kiện xinh - Ốp Lưng - Quà Lưu Niệm ✨</span>
+    <!-- Brand Showcase Bar -->
+    <div class="brand-bar">
+      <div class="brand-bar-inner">
+        <a href="#" class="brand-logo-link" id="logo">
+          <img src="logo.jpg" alt="Fairy House Logo" class="logo-img" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧚</text></svg>'">
+          <div class="brand-name-group">
+            <h1 class="brand-name">Fairy House</h1>
+            <div class="brand-tagline">Phụ Kiện Xinh &bull; Quà Lưu Niệm</div>
+          </div>
+        </a>
+        <div class="brand-decorations">
+          <span class="brand-sparkle">✦</span>
+          <span class="brand-sparkle">✦</span>
+          <span class="brand-sparkle">✦</span>
         </div>
-      </a>
-      <div class="header-contact">
-        <a href="tel:0378791667" id="btn-hotline"><i class="fa-solid fa-phone"></i> 0378 791 667</a>
-        <a href="https://zalo.me/0378791667" target="_blank" id="btn-zalo-header"><i class="fa-solid fa-comment-dots"></i> Zalo</a>
-        <button class="cart-btn-header" id="headerCartBtn">
-          <i class="fa-solid fa-shopping-cart"></i> Giỏ hàng <span class="cart-count badge" id="headerCartCount">0</span>
-        </button>
-        <div id="loginButtonsContainer" class="login-buttons-wrapper">
-          <button class="google-login-btn" onclick="handleGoogleLogin()">
-            <i class="fa-brands fa-google"></i> Đăng nhập Google
+      </div>
+    </div>
+    <!-- Utility Bar -->
+    <div class="utility-bar">
+      <div class="utility-bar-inner">
+        <div class="header-contact">
+          <a href="tel:0378791667" id="btn-hotline"><i class="fa-solid fa-phone"></i> 0378 791 667</a>
+          <a href="https://zalo.me/0378791667" target="_blank" id="btn-zalo-header"><i class="fa-solid fa-comment-dots"></i> Zalo</a>
+          <button class="cart-btn-header" id="headerCartBtn">
+            <i class="fa-solid fa-shopping-cart"></i> Giỏ hàng <span class="cart-count badge" id="headerCartCount">0</span>
           </button>
-        </div>
-        <div class="user-avatar-wrapper" id="userAvatarWrapper" style="display:none;">
-          <img id="userAvatar" class="user-avatar" src="" alt="avatar">
-          <span id="userDisplayName" class="user-name-header"></span>
-          <button class="btn-logout" id="btnLogout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+          <div id="loginButtonsContainer" class="login-buttons-wrapper">
+            <button class="google-login-btn" onclick="handleGoogleLogin()">
+              <i class="fa-brands fa-google"></i> Đăng nhập Google
+            </button>
+          </div>
+          <div class="user-avatar-wrapper" id="userAvatarWrapper" style="display:none;">
+            <img id="userAvatar" class="user-avatar" src="" alt="avatar">
+            <span id="userDisplayName" class="user-name-header"></span>
+            <button class="btn-logout" id="btnLogout" onclick="handleLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+          </div>
         </div>
       </div>
     </div>
@@ -54,6 +67,7 @@
       <div class="nav-links">
         <a href="#" class="nav-link active" id="nav-home">🏠 Trang Chủ</a>
         <a href="#section-new" class="nav-link">🆕 Sản Phẩm Mới</a>
+        <a href="#section-accessory" class="nav-link">🎀 Phụ Kiện Xinh</a>
         <a href="#section-keychain" class="nav-link">🔑 Móc Khoá Trend</a>
         <a href="#section-souvenir" class="nav-link">🎁 Quà Lưu Niệm</a>
         <a href="#section-map" class="nav-link">📍 Bản Đồ</a>
@@ -71,14 +85,13 @@
   <section class="hero">
     <div class="hero-card">
       <div class="hero-banner-img">
-        <img src="banner.png" alt="Tiên House Banner" onerror="this.style.display='none'">
+        <img src="banner.png" alt="Fairy House Banner" onerror="this.style.display='none'">
       </div>
-      <h2>✨ Tiên House ✨</h2>
-      <p>Chuyên phụ kiện xinh, ốp lưng điện thoại, móc khoá và quà lưu niệm dễ thương tại Chợ Mỹ Luông, An Giang ✨</p>
+      <h2>Fairy House</h2>
+      <p>Chuyên phụ kiện xinh, móc khoá trend và quà lưu niệm dễ thương tại Chợ Mỹ Luông, An Giang</p>
       <div class="hero-features">
-        <div class="hero-feat"><i class="fa-solid fa-mobile-screen"></i> Phụ Kiện Xinh</div>
-        <div class="hero-feat"><i class="fa-solid fa-shield-cat"></i> Ốp Lưng Trend</div>
-        <div class="hero-feat"><i class="fa-solid fa-key"></i> Móc Khoá</div>
+        <div class="hero-feat"><i class="fa-solid fa-wand-magic-sparkles"></i> Phụ Kiện Xinh</div>
+        <div class="hero-feat"><i class="fa-solid fa-key"></i> Móc Khoá Trend</div>
         <div class="hero-feat"><i class="fa-solid fa-gift"></i> Quà Lưu Niệm</div>
       </div>
       <div class="hero-social">
@@ -99,20 +112,20 @@
   <section class="products-section" id="section-new">
     <div class="section-title">
       <h2>Sản Phẩm Mới</h2>
-      <p>Những mẫu phụ kiện và ốp lưng cao cấp, tinh tế dành cho bạn ✨</p>
+      <p>Những mẫu phụ kiện xinh xắn, dễ thương mới nhất dành cho bạn ✨</p>
     </div>
     <div class="products-grid" id="grid-new">
       <!-- Products rendered by JS -->
     </div>
   </section>
 
-  <!-- Ốp Lưng Section -->
-  <section class="products-section" id="section-case" style="display:none;">
+  <!-- Phụ Kiện Xinh Section -->
+  <section class="products-section" id="section-accessory">
     <div class="section-title">
-      <h2>Ốp Lưng Điện Thoại</h2>
-      <p>Những mẫu ốp lưng bảo vệ xịn xò, thời trang nhất 📱</p>
+      <h2>Phụ Kiện Xinh</h2>
+      <p>Những phụ kiện dễ thương, nổi bật phong cách riêng của bạn 🎀</p>
     </div>
-    <div class="products-grid" id="grid-case">
+    <div class="products-grid" id="grid-accessory">
       <!-- Products rendered by JS -->
     </div>
   </section>
@@ -143,7 +156,7 @@
   <section class="map-section" id="section-map">
     <div class="section-title">
       <h2>📍 Vị Trí Cửa Hàng</h2>
-      <p>Tiên House - Chợ Mỹ Luông, An Giang</p>
+      <p>Fairy House - Chợ Mỹ Luông, An Giang</p>
     </div>
     <div class="map-container">
       <iframe 
@@ -157,8 +170,8 @@
   <footer class="footer" id="contact">
     <div class="footer-inner">
       <div class="footer-col">
-        <h3>✨ Tiên House</h3>
-        <p>Tiện lợi mỗi ngày. Chuyên cung cấp phụ kiện xinh, ốp lưng điện thoại, móc khoá và quà lưu niệm dễ thương.</p>
+        <h3>🧚‍♀️ Fairy House</h3>
+        <p>Tiện lợi mỗi ngày. Chuyên cung cấp phụ kiện xinh, móc khoá trend và quà lưu niệm dễ thương.</p>
         <div class="footer-social">
           <a href="https://www.facebook.com/profile.php?id=1062931456907313" target="_blank" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
           <a href="https://www.tiktok.com/@tienhouse67" target="_blank" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
@@ -173,14 +186,14 @@
       </div>
       <div class="footer-col">
         <h3>💝 Dịch Vụ</h3>
-        <p><a href="#">✨ Phụ kiện điện thoại</a></p>
-        <p><a href="#">📱 Ốp lưng thời trang</a></p>
+        <p><a href="#">🎀 Phụ kiện xinh</a></p>
+        <p><a href="#">🔑 Móc khoá trend</a></p>
         <p><a href="#">🎁 Quà lưu niệm dễ thương</a></p>
         <p><a href="#">💰 Tư vấn & Báo giá</a></p>
       </div>
     </div>
     <div class="footer-bottom">
-      © 2026 Tiên House. Made with 💖 tại Chợ Mỹ Luông, An Giang
+      © 2026 Fairy House. Made with 💖 tại Chợ Mỹ Luông, An Giang
     </div>
   </footer>
 
@@ -356,7 +369,7 @@
         
         <div class="checkout-notice">
           <i class="fa-solid fa-box-open"></i>
-          <p>Đơn hàng <strong>Tiên House</strong> luôn được đóng gói cẩn thận. Tránh trường hợp đáng tiếc, Khách hàng vui lòng <strong>quay video khi bóc hàng</strong> để được hỗ trợ tốt nhất nếu Sản Phẩm xảy ra vấn đề.</p>
+          <p>Đơn hàng <strong>Fairy House</strong> luôn được đóng gói cẩn thận. Tránh trường hợp đáng tiếc, Khách hàng vui lòng <strong>quay video khi bóc hàng</strong> để được hỗ trợ tốt nhất nếu Sản Phẩm xảy ra vấn đề.</p>
         </div>
 
         <button type="submit" class="btn-checkout" id="btnSubmitOrder">
@@ -371,7 +384,7 @@
     <div class="modal" style="text-align: center; padding: 40px 20px;">
       <div style="font-size: 4rem; color: var(--primary-500); margin-bottom: 20px;"><i class="fa-solid fa-circle-check"></i></div>
       <h3 style="margin-bottom: 15px;">Đặt hàng thành công!</h3>
-      <p style="margin-bottom: 25px; line-height: 1.6; font-size: 1.05rem;">Cảm ơn bạn đã đặt hàng tại <strong>Tiên House</strong>.<br>Thông tin đã được ghi nhận và chúng tôi sẽ sớm liên hệ để xác nhận đơn hàng.</p>
+      <p style="margin-bottom: 25px; line-height: 1.6; font-size: 1.05rem;">Cảm ơn bạn đã đặt hàng tại <strong>Fairy House</strong>.<br>Thông tin đã được ghi nhận và chúng tôi sẽ sớm liên hệ để xác nhận đơn hàng.</p>
       <button class="btn-primary" onclick="closeSuccessModal()" style="padding: 12px 30px; display: inline-block; width: auto; min-width: 150px;">Đóng</button>
     </div>
   </div>

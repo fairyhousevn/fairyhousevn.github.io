@@ -11,7 +11,7 @@
 //    - priceNum: Giá bán (chỉ nhập số, VD: 89000)
 //    - oldPrice: Giá cũ để gạch ngang (VD: 120.000₫) - Để trống nếu không sale
 //    - img: Link ảnh sản phẩm (nhiều ảnh cách nhau bằng dấu phẩy)
-//    - category: Điền "Mới", "Ốp Lưng", "Móc Khoá", "Quà Lưu Niệm"
+//    - category: Điền "Mới", "Phụ Kiện", "Móc Khoá", "Quà Lưu Niệm"
 //    - requiresModel: TRUE nếu bắt buộc chọn dòng máy, FALSE nếu không
 //    - description: Mô tả sản phẩm
 //    - stock: Tổng số lượng sản phẩm (VD: 100)
@@ -24,8 +24,8 @@ const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR
 // DỮ LIỆU MẪU
 // =========================================================
 const sampleProducts = [
-  { id: 1, name: "Ốp Lưng IPhone Đính Nơ Xinh", code: "OL.01", price: "89.000₫", priceNum: 89000, oldPrice: "120.000₫", sale: true, img: "product_image.jpg", category: "Mới", requiresModel: true, description: "Ốp lưng xịn xò hottrend tiktok. Nhựa dẻo ôm sát, bảo vệ máy cực tốt.", stock: 100, sold: 15 },
-  { id: 2, name: "Ốp IPhone Tráng Gương", code: "OL.02", price: "95.000₫", priceNum: 95000, oldPrice: "150.000₫", sale: true, img: "product_image.jpg", category: "Ốp Lưng", requiresModel: true, description: "Ốp tráng gương sang chảnh, chất liệu cao cấp.", stock: 50, sold: 50 },
+  { id: 1, name: "Kẹp Tóc Nơ Bướm Đính Đá", code: "PK.01", price: "45.000₫", priceNum: 45000, oldPrice: "65.000₫", sale: true, img: "product_image.jpg", category: "Mới", requiresModel: false, description: "Kẹp tóc nơ bướm đính đá lấp lánh, xinh xắn cho các nàng.", stock: 100, sold: 15 },
+  { id: 2, name: "Dây Buộc Tóc Hoa Hồng", code: "PK.02", price: "25.000₫", priceNum: 25000, oldPrice: "40.000₫", sale: true, img: "product_image.jpg", category: "Phụ Kiện", requiresModel: false, description: "Dây buộc tóc hoa hồng dễ thương, chất liệu cao cấp.", stock: 50, sold: 20 },
   { id: 3, name: "Móc Khoá Capybara Bóp Kêu", code: "MK.01", price: "35.000₫", priceNum: 35000, oldPrice: "50.000₫", sale: true, img: "product_image.jpg", category: "Móc Khoá", requiresModel: false, description: "Móc khoá Capybara bóp kêu cute xỉu.", stock: 200, sold: 45 },
   { id: 4, name: "Quả Cầu Tuyết Tình Yêu", code: "QLN.01", price: "120.000₫", priceNum: 120000, oldPrice: "150.000₫", sale: true, img: "product_image.jpg", category: "Quà Lưu Niệm", requiresModel: false, description: "Quả cầu tuyết lung linh đẹp mắt. Có đèn LED đổi màu.", stock: 20, sold: 5 }
 ];
@@ -68,7 +68,7 @@ async function initApp() {
 
               let rawCode = (row.Code || row.code || "").trim().toUpperCase();
               let finalCat = "Mới";
-              if (rawCode.includes("OP")) finalCat = "Ốp Lưng";
+              if (rawCode.includes("OP") || rawCode.includes("PK")) finalCat = "Phụ Kiện";
               else if (rawCode.includes("MK")) finalCat = "Móc Khoá";
               else if (rawCode.includes("QL")) finalCat = "Quà Lưu Niệm";
               
@@ -79,7 +79,7 @@ async function initApp() {
 
               let name = row['Sản Phẩm'] || row.name || "Sản phẩm không tên";
               let code = row.Code || row.code || `SP.${row.id}`;
-              let requiresModel = finalCat === "Ốp Lưng";
+              let requiresModel = false;
 
               return {
                 id: parseInt(row.id),
@@ -94,7 +94,7 @@ async function initApp() {
                 images: imgs,
                 category: finalCat,
                 requiresModel: requiresModel,
-                description: row['Thông Tin Sản Phẩm'] || row.description || "Sản phẩm chất lượng từ Tiên House.",
+                description: row['Thông Tin Sản Phẩm'] || row.description || "Sản phẩm chất lượng từ Fairy House.",
                 stock: totalStock,
                 sold: sold
               };
@@ -156,13 +156,13 @@ function generateProductHTML(p) {
 function renderAllProducts(productList) {
   const cats = { 
     'Mới': 'grid-new', 
-    'Ốp Lưng': 'grid-case', 
+    'Phụ Kiện': 'grid-accessory', 
     'Móc Khoá': 'grid-keychain', 
     'Quà Lưu Niệm': 'grid-souvenir' 
   };
   const sections = { 
     'Mới': 'section-new', 
-    'Ốp Lưng': 'section-case', 
+    'Phụ Kiện': 'section-accessory', 
     'Móc Khoá': 'section-keychain', 
     'Quà Lưu Niệm': 'section-souvenir' 
   };
@@ -500,7 +500,7 @@ document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     return `${i+1}. [${item.code}] ${item.name}${m} | SL: ${item.quantity} | Giá: ${formatCurrency(item.priceNum)}`;
   }).join('\n');
 
-  const formattedOrder = `🛍️ ĐƠN HÀNG MỚI TỪ TIÊN HOUSE
+  const formattedOrder = `🛍️ ĐƠN HÀNG MỚI TỪ FAIRY HOUSE
 -----------------------------------
 👤 Khách hàng: ${custName}
 📱 Số điện thoại: ${custPhone}
