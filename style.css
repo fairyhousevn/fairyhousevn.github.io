@@ -768,6 +768,45 @@ body {
 .gallery-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.5); border: none; cursor: pointer; transition: all 0.3s; padding: 0; }
 .gallery-dot.active { background: var(--primary-500); width: 20px; border-radius: 4px; }
 
+/* ===== GALLERY THUMBNAILS ===== */
+.gallery-thumbnails {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 0 8px;
+  justify-content: center;
+  margin-bottom: 12px;
+  scrollbar-width: thin;
+}
+.gallery-thumbnails::-webkit-scrollbar {
+  height: 4px;
+}
+.gallery-thumbnails::-webkit-scrollbar-thumb {
+  background: var(--primary-200);
+  border-radius: 2px;
+}
+.gallery-thumbnail {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  object-fit: cover;
+  transition: all 0.2s ease-in-out;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+  background: var(--white);
+}
+.gallery-thumbnail:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+.gallery-thumbnail.active {
+  border-color: var(--primary-500);
+  box-shadow: 0 0 8px rgba(247, 77, 123, 0.4);
+  transform: scale(1.05);
+}
+
 /* ===== MODAL PRODUCT DETAIL ===== */
 .modal-product-detail { max-width: 500px; max-height: 90vh; overflow-y: auto; }
 .modal-product-detail h3 { border-bottom: none; padding-bottom: 0; margin-bottom: 5px; }

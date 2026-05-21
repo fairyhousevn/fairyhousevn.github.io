@@ -275,6 +275,7 @@ function openProductModal(id) {
   const images = currentSelectedProduct.images || [currentSelectedProduct.img];
   const slidesEl = document.getElementById('gallerySlides');
   const dotsEl = document.getElementById('galleryDots');
+  const thumbsEl = document.getElementById('galleryThumbnails');
 
   slidesEl.innerHTML = images.map(url => `<img src="${url}" alt="${currentSelectedProduct.name}">`).join('');
   dotsEl.innerHTML = images.map((_, i) => `<button class="gallery-dot ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})"></button>`).join('');
@@ -283,6 +284,16 @@ function openProductModal(id) {
   document.getElementById('galleryPrev').style.display = showNav ? 'flex' : 'none';
   document.getElementById('galleryNext').style.display = showNav ? 'flex' : 'none';
   dotsEl.style.display = showNav ? 'flex' : 'none';
+
+  if (showNav) {
+    thumbsEl.innerHTML = images.map((url, i) => 
+      `<img src="${url}" class="gallery-thumbnail ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})" alt="thumbnail">`
+    ).join('');
+    thumbsEl.style.display = 'flex';
+  } else {
+    thumbsEl.style.display = 'none';
+    thumbsEl.innerHTML = '';
+  }
   updateGallery();
 
   if (currentSelectedProduct.requiresModel) {
@@ -305,6 +316,7 @@ function updateGallery() {
   const slidesEl = document.getElementById('gallerySlides');
   slidesEl.style.transform = `translateX(-${galleryIndex * 100}%)`;
   document.querySelectorAll('.gallery-dot').forEach((d, i) => d.classList.toggle('active', i === galleryIndex));
+  document.querySelectorAll('.gallery-thumbnail').forEach((t, i) => t.classList.toggle('active', i === galleryIndex));
 }
 
 function goToSlide(i) { galleryIndex = i; updateGallery(); }
