@@ -40,6 +40,20 @@ let touchEndX = 0;
 // =========================================================
 // FETCH SHEET VÀ RENDER
 // =========================================================
+
+// Helper đọc giá trị cột không phân biệt hoa/thường/dấu Tiếng Việt
+const getRowVal = (row, keywords, defaultVal = "") => {
+  if (!row) return defaultVal;
+  const key = Object.keys(row).find(k => {
+    const normalized = k.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return keywords.some(kw => {
+      const kwNorm = kw.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      return normalized === kwNorm || normalized.includes(kwNorm);
+    });
+  });
+  return key ? row[key] : defaultVal;
+};
+
 async function initApp() {
   const loading = document.getElementById('loadingOverlay');
   loading.querySelector('p').textContent = "Đang tải dữ liệu sản phẩm...";
@@ -63,8 +77,8 @@ async function initApp() {
             
             let tempId = maxId;
             const validRows = results.data.filter(row => {
-              const name = row['Sản Phẩm'] || row.name || "";
-              return name.trim() !== "";
+              const name = getRowVal(row, ['sản phẩm', 'san pham', 'name']) || row.name || "";
+              return String(name).trim() !== "";
             });
 
             products = validRows.map((row, index) => {
@@ -74,18 +88,18 @@ async function initApp() {
                 id = tempId;
               }
 
-              const rawPrice = row['Giá'] || row.priceNum || "0";
+              const rawPrice = getRowVal(row, ['giá', 'gia', 'price']) || "0";
               const priceNum = parseInt(String(rawPrice).replace(/\D/g, '')) || 0;
               
               let imgs = [];
-              const rawImg = row['Ảnh'] || row.img;
-              if (rawImg) imgs = rawImg.split(',').map(url => url.trim()).filter(url => url);
+              const rawImg = getRowVal(row, ['ảnh', 'anh', 'img', 'image']);
+              if (rawImg) imgs = String(rawImg).split(',').map(url => url.trim()).filter(url => url);
               if (imgs.length === 0) imgs = ["product_image.jpg"];
               
-              const totalStock = parseInt(row['hàng tồn kho'] || row.stock) || 0;
-              const sold = parseInt(row['hàng đã bán'] || row.sold) || 0;
+              const totalStock = parseInt(getRowVal(row, ['hàng tồn kho', 'tồn kho', 'stock', 'kho'])) || 0;
+              const sold = parseInt(getRowVal(row, ['hàng đã bán', 'đã bán', 'sold'])) || 0;
 
-              let rawCode = (row.Code || row.code || "").trim();
+              let rawCode = String(getRowVal(row, ['code', 'mã', 'ma']) || "").trim();
               let finalCat = "Phụ Kiện";
               let code = "";
 
@@ -114,13 +128,13 @@ async function initApp() {
                 code = rawCode || `SP.${id}`;
               }
               
-              let chiTiet = (row['Chi Tiết'] || "").trim().toLowerCase();
+              let chiTiet = String(getRowVal(row, ['chi tiết', 'chi tiet', 'detail', 'status']) || "").trim().toLowerCase();
               let isNew = chiTiet === "mới" || chiTiet === "new";
-              let oldPrice = (row['Giảm Giá'] || row.oldPrice || "").trim();
+              let oldPrice = String(getRowVal(row, ['giảm giá', 'giam gia', 'sale', 'oldprice']) || "").trim();
               let isSale = chiTiet === "sale" || oldPrice !== "";
 
-              let name = row['Sản Phẩm'] || row.name || "Sản phẩm không tên";
-              let requiresModel = false;
+              let name = getRowVal(row, ['sản phẩm', 'san pham', 'name']) || "Sản phẩm không tên";
+              let requiresModel = String(getRowVal(row, ['requiresModel', 'dòng máy', 'chon may']) || "").trim().toLowerCase() === "true";
 
               return {
                 id: id,
@@ -135,7 +149,7 @@ async function initApp() {
                 images: imgs,
                 category: finalCat,
                 requiresModel: requiresModel,
-                description: row['Thông Tin Sản Phẩm'] || row.description || "Sản phẩm chất lượng từ Fairy House.",
+                description: getRowVal(row, ['thông tin sản phẩm', 'thong tin san pham', 'description', 'mô tả', 'mo ta']) || "Sản phẩm chất lượng từ Fairy House.",
                 stock: totalStock,
                 sold: sold
               };
@@ -260,16 +274,16 @@ function openProductModal(id) {
   
   if (isOutOfStock) {
     btnAddToCart.disabled = true;
-    btnAddToCart.style.opacity = '0.5';
+    btnAddToCart.classList.add('btn-disabled');
     btnAddToCart.innerHTML = '<i class="fa-solid fa-ban"></i> Đã Hết Hàng';
     btnBuyNow.disabled = true;
-    btnBuyNow.style.opacity = '0.5';
+    btnBuyNow.classList.add('btn-disabled');
   } else {
     btnAddToCart.disabled = false;
-    btnAddToCart.style.opacity = '1';
+    btnAddToCart.classList.remove('btn-disabled');
     btnAddToCart.innerHTML = '<i class="fa-solid fa-cart-plus"></i> Thêm vào giỏ hàng';
     btnBuyNow.disabled = false;
-    btnBuyNow.style.opacity = '1';
+    btnBuyNow.classList.remove('btn-disabled');
   }
 
   const images = currentSelectedProduct.images || [currentSelectedProduct.img];
@@ -362,17 +376,33 @@ document.getElementById('modalOverlay').addEventListener('click', (e) => {
 
 // ===== VALIDATE MODEL & GET CART ITEM =====
 function validateAndGetCartItem() {
+  if (!currentSelectedProduct) return null;
+  const remaining = currentSelectedProduct.stock - currentSelectedProduct.sold;
+  if (remaining <= 0) {
+    alert("Sản phẩm này đã hết hàng!");
+    return null;
+  }
+
   let selectedModel = "Mặc định";
   if (currentSelectedProduct.requiresModel) {
     selectedModel = document.getElementById('phoneModelSelect').value;
     if (!selectedModel) { document.getElementById('modelError').style.display = "block"; return null; }
   }
   document.getElementById('modelError').style.display = "none";
+
+  const cartId = `${currentSelectedProduct.id}_${selectedModel}`;
+  const existing = cart.find(item => item.cartId === cartId);
+  const currentQty = existing ? existing.quantity : 0;
+  if (currentQty + 1 > remaining) {
+    alert(`Không thể chọn thêm. Fairy House chỉ còn ${remaining} sản phẩm này trong kho!`);
+    return null;
+  }
+
   return {
     id: currentSelectedProduct.id, code: currentSelectedProduct.code,
     name: currentSelectedProduct.name, price: currentSelectedProduct.price,
     priceNum: currentSelectedProduct.priceNum, img: currentSelectedProduct.img,
-    model: selectedModel, cartId: `${currentSelectedProduct.id}_${selectedModel}`,
+    model: selectedModel, cartId: cartId,
     quantity: 1, requiresModel: currentSelectedProduct.requiresModel,
     description: currentSelectedProduct.description
   };
@@ -443,7 +473,21 @@ function updateCartUI() {
 
 function changeQty(cartId, delta) {
   const item = cart.find(x => x.cartId === cartId);
-  if (item) { item.quantity += delta; if (item.quantity <= 0) cart = cart.filter(x => x.cartId !== cartId); updateCartUI(); }
+  if (item) {
+    if (delta > 0) {
+      const p = products.find(x => x.id === item.id);
+      if (p) {
+        const remaining = p.stock - p.sold;
+        if (item.quantity + delta > remaining) {
+          alert(`Không thể tăng thêm. Fairy House chỉ còn ${remaining} sản phẩm này trong kho!`);
+          return;
+        }
+      }
+    }
+    item.quantity += delta;
+    if (item.quantity <= 0) cart = cart.filter(x => x.cartId !== cartId);
+    updateCartUI();
+  }
 }
 function removeItem(cartId) { cart = cart.filter(x => x.cartId !== cartId); updateCartUI(); }
 function formatCurrency(num) { return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") + "₫"; }
