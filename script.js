@@ -54,7 +54,26 @@ async function initApp() {
         Papa.parse(noCacheUrl, {
           download: true, header: true, skipEmptyLines: true,
           complete: function(results) {
-            products = results.data.filter(row => row.id).map(row => {
+            // Tìm ID lớn nhất hiện tại để làm cơ sở tự tăng ID cho hàng bị thiếu ID
+            let maxId = 0;
+            results.data.forEach(row => {
+              const val = parseInt(row.id);
+              if (!isNaN(val) && val > maxId) maxId = val;
+            });
+            
+            let tempId = maxId;
+            const validRows = results.data.filter(row => {
+              const name = row['Sản Phẩm'] || row.name || "";
+              return name.trim() !== "";
+            });
+
+            products = validRows.map((row, index) => {
+              let id = parseInt(row.id);
+              if (isNaN(id)) {
+                tempId++;
+                id = tempId;
+              }
+
               const rawPrice = row['Giá'] || row.priceNum || "0";
               const priceNum = parseInt(String(rawPrice).replace(/\D/g, '')) || 0;
               
@@ -66,23 +85,45 @@ async function initApp() {
               const totalStock = parseInt(row['hàng tồn kho'] || row.stock) || 0;
               const sold = parseInt(row['hàng đã bán'] || row.sold) || 0;
 
-              let rawCode = (row.Code || row.code || "").trim().toUpperCase();
-              let finalCat = "Mới";
-              if (rawCode.includes("OP") || rawCode.includes("PK")) finalCat = "Phụ Kiện";
-              else if (rawCode.includes("MK")) finalCat = "Móc Khoá";
-              else if (rawCode.includes("QL")) finalCat = "Quà Lưu Niệm";
+              let rawCode = (row.Code || row.code || "").trim();
+              let finalCat = "Phụ Kiện";
+              let code = "";
+
+              const lowerCode = rawCode.toLowerCase();
+              if (lowerCode.includes("móc khóa") || lowerCode.includes("móc khoá") || lowerCode.includes("moc khoa")) {
+                finalCat = "Móc Khoá";
+                code = `MK.${String(id).padStart(2, '0')}`;
+              } else if (lowerCode.includes("quà lưu niệm") || lowerCode.includes("qua luu niem") || lowerCode.includes("quà")) {
+                finalCat = "Quà Lưu Niệm";
+                code = `QLN.${String(id).padStart(2, '0')}`;
+              } else if (lowerCode.includes("phụ kiện") || lowerCode.includes("phu kien") || lowerCode.includes("xinh")) {
+                finalCat = "Phụ Kiện";
+                code = `PK.${String(id).padStart(2, '0')}`;
+              } else {
+                // Hỗ trợ nếu dùng mã ngắn trực tiếp (ví dụ: PK.01, MK.02, QL.03)
+                let upperCode = rawCode.toUpperCase();
+                if (upperCode.includes("OP") || upperCode.includes("PK")) {
+                  finalCat = "Phụ Kiện";
+                } else if (upperCode.includes("MK")) {
+                  finalCat = "Móc Khoá";
+                } else if (upperCode.includes("QL")) {
+                  finalCat = "Quà Lưu Niệm";
+                } else {
+                  finalCat = "Phụ Kiện";
+                }
+                code = rawCode || `SP.${id}`;
+              }
               
               let chiTiet = (row['Chi Tiết'] || "").trim().toLowerCase();
-              let isNew = chiTiet === "mới";
+              let isNew = chiTiet === "mới" || chiTiet === "new";
               let oldPrice = (row['Giảm Giá'] || row.oldPrice || "").trim();
               let isSale = chiTiet === "sale" || oldPrice !== "";
 
               let name = row['Sản Phẩm'] || row.name || "Sản phẩm không tên";
-              let code = row.Code || row.code || `SP.${row.id}`;
               let requiresModel = false;
 
               return {
-                id: parseInt(row.id),
+                id: id,
                 name: name,
                 code: code,
                 price: priceNum.toLocaleString('vi-VN') + "₫",
@@ -168,7 +209,9 @@ function renderAllProducts(productList) {
   };
   
   for (const [cat, gridId] of Object.entries(cats)) {
-    const items = productList.filter(p => p.category === cat);
+    const items = cat === 'Mới' 
+      ? productList.filter(p => p.isNew || p.category === 'Mới') 
+      : productList.filter(p => p.category === cat);
     const grid = document.getElementById(gridId);
     if (grid) grid.innerHTML = items.map(generateProductHTML).join('');
     
