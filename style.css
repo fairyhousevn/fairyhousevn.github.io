@@ -830,6 +830,9 @@ body {
     order: 3;
     gap: 4px;
     align-items: center;
+    width: 76px; /* Giữ cố định chiều rộng trên mobile để không làm co ô tìm kiếm khi trạng thái đăng nhập thay đổi */
+    justify-content: flex-end;
+    flex-shrink: 0;
   }
   /* Ẩn hotline và zalo dạng text trên di động */
   .header-actions .action-hotline,
