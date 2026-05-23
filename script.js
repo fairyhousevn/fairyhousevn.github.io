@@ -693,8 +693,8 @@ document.querySelectorAll('.nav-link[href^="#"]').forEach(link => {
 
 // Tự động active danh mục tương ứng khi cuộn trang
 if ('IntersectionObserver' in window) {
-  // Khoảng bù trừ tự động chuyển đổi theo thiết bị (Mobile đã co 160px, Desktop đã co 140px)
-  const offsetHeight = window.innerWidth <= 768 ? 160 : 140;
+  // Khoảng bù trừ tự động chuyển đổi theo thiết bị (Mobile đã co 95px, Desktop đã co 140px)
+  const offsetHeight = window.innerWidth <= 768 ? 95 : 140;
   const observerOptions = {
     root: null,
     rootMargin: `-${offsetHeight}px 0px -50% 0px`,
