@@ -820,15 +820,12 @@ body {
   .nav-inner { flex-direction: column; gap: 0; padding: 4px 12px; }
   .nav-links {
     display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    width: calc(100% + 30px);
-    margin: 0 -15px; /* Tràn lề hai bên mép màn hình trên mobile */
-    justify-content: flex-start;
-    padding: 8px 15px; /* Khoảng đệm an toàn để không bị cắt đổ bóng của nút */
-    gap: 10px;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    flex-wrap: wrap; /* Cho phép xuống dòng cân xứng */
+    width: 100%;
+    margin: 0;
+    justify-content: center;
+    padding: 6px 0;
+    gap: 8px; /* Khoảng cách giữa các nút */
   }
   .nav-links::-webkit-scrollbar {
     display: none;
@@ -838,6 +835,9 @@ body {
     padding: 4px 10px 4px 4px;
     white-space: nowrap;
     flex-shrink: 0;
+    flex-grow: 1; /* Tự động lấp đầy khoảng trống */
+    width: calc(50% - 4px); /* Mỗi dòng chứa đúng 2 danh mục đều nhau */
+    justify-content: center; /* Căn giữa icon và chữ */
   }
   .hero-card { padding: 30px 20px; }
   .products-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
@@ -851,7 +851,7 @@ body {
     font-size: 0.85rem;
   }
   .products-section {
-    scroll-margin-top: 235px; /* Bù khoảng cách cho menu dính trên mobile */
+    scroll-margin-top: 270px; /* Bù khoảng cách cho menu dính 2 dòng trên mobile */
   }
   .header-middle-inner {
     padding: 8px 12px;
