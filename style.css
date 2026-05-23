@@ -773,28 +773,28 @@ body {
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .header-top {
-    padding: 10px 16px;
+    padding: 6px 12px;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
   }
   .header-logo-group {
     order: 1;
     gap: 10px;
   }
   .header-logo-img {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
   }
   .header-brand-name {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     letter-spacing: 0.2px;
     color: #ff2d70;
     text-shadow: 1px 1px 0px #ffffff, 1.5px 1.5px 0px #ffe3e8, 2px 2px 4px rgba(230, 0, 92, 0.15);
   }
   .header-brand-tagline {
-    font-size: 0.65rem;
+    font-size: 0.62rem;
     letter-spacing: 1px;
-    margin-top: 6px;
+    margin-top: 4px;
   }
   .header-search-container {
     order: 3;
@@ -817,7 +817,7 @@ body {
     font-size: 0.8rem;
   }
   .nav { top: 0; position: relative; }
-  .nav-inner { flex-direction: column; gap: 0; padding: 6px 15px; }
+  .nav-inner { flex-direction: column; gap: 0; padding: 4px 12px; }
   .nav-links {
     display: flex;
     flex-wrap: nowrap;
@@ -834,8 +834,8 @@ body {
     display: none;
   }
   .nav-link {
-    font-size: 0.82rem;
-    padding: 5px 12px 5px 5px; /* Giữ padding trái nhỏ cho khuyên icon tròn */
+    font-size: 0.8rem;
+    padding: 4px 10px 4px 4px;
     white-space: nowrap;
     flex-shrink: 0;
   }
@@ -851,18 +851,32 @@ body {
     font-size: 0.85rem;
   }
   .products-section {
-    scroll-margin-top: 195px; /* Bù khoảng cách cho menu dính trên mobile */
+    scroll-margin-top: 235px; /* Bù khoảng cách cho menu dính trên mobile */
   }
   .header-middle-inner {
-    padding: 6px 16px;
-    justify-content: center;
+    padding: 8px 12px;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
   }
   .header-intro-text {
-    display: none;
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary-700);
+    margin: 0;
+    line-height: 1.4;
+    text-align: center;
   }
   .header-social-links {
     width: 100%;
     justify-content: center;
+    gap: 8px;
+  }
+  .header-social-btn {
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    border-radius: 12px;
   }
 }
 @media (max-width: 480px) {
