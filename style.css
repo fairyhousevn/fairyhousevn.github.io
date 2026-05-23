@@ -825,29 +825,29 @@ body {
     width: 100%;
     margin: 0;
     justify-content: center;
-    padding: 5px 0;
-    gap: 4px; /* Thu hẹp khoảng cách giữa các nút */
+    padding: 4px 0;
+    gap: 3px; /* Thu hẹp khoảng cách giữa các nút thêm tí nữa */
   }
   .nav-links::-webkit-scrollbar {
     display: none;
   }
   .nav-link {
-    font-size: 0.65rem; /* Thu nhỏ thêm một chút nữa */
-    padding: 4px 6px; /* Thu gọn padding */
+    font-size: 0.58rem; /* Thu nhỏ thêm tí nữa cho thật gọn */
+    padding: 3px 5px; /* Giảm padding tối đa */
     white-space: nowrap;
     flex-shrink: 1;
     flex-grow: 1;
     width: auto;
-    border-radius: 10px; /* Bo góc nhỏ nhắn hơn */
+    border-radius: 8px; /* Bo góc nhỏ gọn tương xứng */
     justify-content: center; /* Căn giữa icon và chữ */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   }
   .nav-icon-badge {
     background: transparent; /* Loại bỏ khuyên tròn trắng trên mobile */
     box-shadow: none;
     width: auto;
     height: auto;
-    font-size: 0.72rem; /* Thu nhỏ emoji tương ứng */
+    font-size: 0.65rem; /* Thu nhỏ emoji thêm chút nữa */
     margin: 0;
     padding: 0;
   }
