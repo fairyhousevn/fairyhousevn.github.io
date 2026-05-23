@@ -828,14 +828,13 @@ body {
   }
   .header-actions {
     order: 3;
-    gap: 4px;
+    gap: 8px;
     align-items: center;
-    width: 60px; /* Khóa cứng chiều rộng 60px hoàn hảo trên mobile để không làm co ô tìm kiếm */
-    min-width: 60px;
-    max-width: 60px;
+    width: 72px; /* Khóa cứng chiều rộng 72px hoàn hảo trên mobile để không làm co ô tìm kiếm */
+    min-width: 72px;
+    max-width: 72px;
     justify-content: flex-end;
     flex-shrink: 0;
-    overflow: hidden;
   }
   /* Ẩn hotline và zalo dạng text trên di động */
   .header-actions .action-hotline,
@@ -851,17 +850,20 @@ body {
     display: none !important;
   }
   .action-cart {
-    padding: 6px 8px !important;
+    padding: 0 !important;
     background: transparent !important;
     position: relative;
     border-radius: 50% !important;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
     border: none;
+    flex-shrink: 0;
   }
   .action-cart i {
-    font-size: 0.95rem;
+    font-size: 1.05rem;
   }
   .action-cart span.cart-count {
     position: absolute;
@@ -871,33 +873,37 @@ body {
     font-size: 0.6rem;
   }
   .google-login-btn {
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    padding: 0;
+    padding: 0 !important;
+    display: inline-flex;
+    align-items: center;
     justify-content: center;
     box-shadow: none !important;
     animation: none !important;
+    flex-shrink: 0;
   }
   .google-login-btn i {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     margin: 0;
   }
   .user-avatar-wrapper {
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    border: none;
-    background: transparent;
-    gap: 0;
-    display: flex;
+    width: 32px;
+    height: 32px;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    gap: 0 !important;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    flex-shrink: 0;
   }
   .user-avatar {
-    width: 28px; /* Tăng kích thước ảnh đại diện tròn bằng nút đăng nhập */
-    height: 28px;
+    width: 32px; /* Kích thước ảnh đại diện tròn khớp hoàn hảo */
+    height: 32px;
     cursor: pointer;
     border-radius: 50%;
     border: 1px solid var(--primary-300);
