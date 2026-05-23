@@ -657,7 +657,15 @@ function createHearts() {
 }
 
 const scrollBtn = document.getElementById('scrollTop');
-window.addEventListener('scroll', () => { scrollBtn.classList.toggle('show', window.scrollY > 400); });
+window.addEventListener('scroll', () => { 
+  scrollBtn.classList.toggle('show', window.scrollY > 400); 
+  
+  // Smart Sticky Header: Tự động ẩn mượt hàng giới thiệu & MXH khi cuộn trang
+  const header = document.querySelector('.main-header');
+  if (header) {
+    header.classList.toggle('scrolled', window.scrollY > 60);
+  }
+});
 scrollBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
 // Thêm hiệu ứng cuộn mượt khi click logo và xóa trạng thái active
@@ -685,8 +693,8 @@ document.querySelectorAll('.nav-link[href^="#"]').forEach(link => {
 
 // Tự động active danh mục tương ứng khi cuộn trang
 if ('IntersectionObserver' in window) {
-  // Khoảng bù trừ tự động chuyển đổi theo thiết bị (Mobile siêu mảnh 95px, Desktop 165px)
-  const offsetHeight = window.innerWidth <= 768 ? 95 : 165;
+  // Khoảng bù trừ tự động chuyển đổi theo thiết bị (Mobile đã co 160px, Desktop đã co 140px)
+  const offsetHeight = window.innerWidth <= 768 ? 160 : 140;
   const observerOptions = {
     root: null,
     rootMargin: `-${offsetHeight}px 0px -50% 0px`,
