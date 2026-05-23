@@ -657,13 +657,21 @@ function createHearts() {
 }
 
 const scrollBtn = document.getElementById('scrollTop');
+let headerScrolled = false; // Trạng thái hiện tại để tránh vòng lặp giật
 window.addEventListener('scroll', () => { 
   scrollBtn.classList.toggle('show', window.scrollY > 400); 
   
-  // Smart Sticky Header: Tự động ẩn mượt hàng giới thiệu & MXH khi cuộn trang
+  // Smart Sticky Header: Dùng hysteresis để tránh giật tưng tưng
+  // Ẩn khi cuộn xuống qua 60px, chỉ hiện lại khi cuộn về gần đầu trang (< 10px)
   const header = document.querySelector('.main-header');
   if (header) {
-    header.classList.toggle('scrolled', window.scrollY > 60);
+    if (!headerScrolled && window.scrollY > 60) {
+      headerScrolled = true;
+      header.classList.add('scrolled');
+    } else if (headerScrolled && window.scrollY < 10) {
+      headerScrolled = false;
+      header.classList.remove('scrolled');
+    }
   }
 });
 scrollBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });

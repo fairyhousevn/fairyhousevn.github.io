@@ -147,7 +147,7 @@ body {
 }
 .header-search-input::placeholder {
   color: var(--gray-500);
-  opacity: 0.65;
+  opacity: 0.45; /* Mờ hơn để dễ nhìn */
 }
 .header-search-btn {
   background: var(--primary-500);
@@ -839,7 +839,7 @@ body {
     max-width: 60px;
     justify-content: flex-end;
     flex-shrink: 0;
-    overflow: hidden;
+    overflow: visible; /* Đổi thành visible để số 0 trên giỏ hàng không bị cắt cạnh trên mobile */
   }
   /* Ẩn hotline và zalo dạng text trên di động */
   .header-actions .action-hotline,
@@ -869,8 +869,8 @@ body {
   }
   .action-cart span.cart-count {
     position: absolute;
-    top: -1px;
-    right: -2px;
+    top: 2px; /* Thấp xuống một chút so với viền trên của icon giỏ hàng để tránh tràn */
+    right: -3px;
     padding: 1px 4.5px;
     font-size: 0.62rem;
     line-height: 1;
