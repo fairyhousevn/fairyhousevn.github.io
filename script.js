@@ -804,6 +804,13 @@ function handleLogout() {
   if (currentSelectedProduct) loadProductInteractions(currentSelectedProduct.id);
 }
 
+function handleAvatarClick() {
+  if (confirm("Bạn có muốn đăng xuất khỏi tài khoản không?")) {
+    handleLogout();
+  }
+}
+
+
 // ===== LIKES =====
 function toggleLike() {
   if (!currentUser) { handleGoogleLogin(); return; }

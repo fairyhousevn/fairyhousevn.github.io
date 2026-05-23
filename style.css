@@ -830,9 +830,12 @@ body {
     order: 3;
     gap: 4px;
     align-items: center;
-    width: 76px; /* Giữ cố định chiều rộng trên mobile để không làm co ô tìm kiếm khi trạng thái đăng nhập thay đổi */
+    width: 60px; /* Khóa cứng chiều rộng 60px hoàn hảo trên mobile để không làm co ô tìm kiếm */
+    min-width: 60px;
+    max-width: 60px;
     justify-content: flex-end;
     flex-shrink: 0;
+    overflow: hidden;
   }
   /* Ẩn hotline và zalo dạng text trên di động */
   .header-actions .action-hotline,
@@ -841,9 +844,11 @@ body {
   }
   /* Ẩn chữ giỏ hàng & đăng nhập để biến thành các icon tròn */
   .header-actions .cart-text,
-  .header-actions .login-text,
-  .user-name-header {
+  .header-actions .login-text {
     display: none;
+  }
+  .user-name-header {
+    display: none !important;
   }
   .action-cart {
     padding: 6px 8px !important;
@@ -879,18 +884,26 @@ body {
     margin: 0;
   }
   .user-avatar-wrapper {
+    width: 28px;
+    height: 28px;
     padding: 0;
     border: none;
     background: transparent;
-    gap: 2px;
+    gap: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
   }
   .user-avatar {
-    width: 24px;
-    height: 24px;
+    width: 28px; /* Tăng kích thước ảnh đại diện tròn bằng nút đăng nhập */
+    height: 28px;
+    cursor: pointer;
+    border-radius: 50%;
+    border: 1px solid var(--primary-300);
   }
   .btn-logout {
-    padding: 2px;
-    font-size: 0.75rem;
+    display: none !important; /* Ẩn nút đăng xuất trên mobile, khách hàng click vào avatar để đăng xuất */
   }
 
   .nav { top: 0; position: relative; }
