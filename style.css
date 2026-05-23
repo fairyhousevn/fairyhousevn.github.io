@@ -869,10 +869,12 @@ body {
   }
   .action-cart span.cart-count {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    padding: 1px 4px;
-    font-size: 0.6rem;
+    top: -1px;
+    right: -2px;
+    padding: 1px 4.5px;
+    font-size: 0.62rem;
+    line-height: 1;
+    border: 1px solid white;
   }
   .google-login-btn {
     width: 28px;
