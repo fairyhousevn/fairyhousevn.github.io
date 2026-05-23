@@ -145,6 +145,10 @@ body {
   width: 100%;
   padding: 6px 0;
 }
+.header-search-input::placeholder {
+  color: var(--gray-500);
+  opacity: 0.65;
+}
 .header-search-btn {
   background: var(--primary-500);
   color: white;
@@ -828,11 +832,8 @@ body {
   }
   .header-actions {
     order: 3;
-    gap: 8px;
+    gap: 6px;
     align-items: center;
-    width: 72px; /* Khóa cứng chiều rộng 72px hoàn hảo trên mobile để không làm co ô tìm kiếm */
-    min-width: 72px;
-    max-width: 72px;
     justify-content: flex-end;
     flex-shrink: 0;
   }
@@ -846,16 +847,13 @@ body {
   .header-actions .login-text {
     display: none;
   }
-  .user-name-header {
-    display: none !important;
-  }
   .action-cart {
     padding: 0 !important;
     background: transparent !important;
     position: relative;
     border-radius: 50% !important;
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -863,7 +861,7 @@ body {
     flex-shrink: 0;
   }
   .action-cart i {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
   }
   .action-cart span.cart-count {
     position: absolute;
@@ -873,8 +871,8 @@ body {
     font-size: 0.6rem;
   }
   .google-login-btn {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     padding: 0 !important;
     display: inline-flex;
@@ -885,31 +883,46 @@ body {
     flex-shrink: 0;
   }
   .google-login-btn i {
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     margin: 0;
   }
   .user-avatar-wrapper {
-    width: 32px;
-    height: 32px;
-    padding: 0 !important;
-    border: none !important;
-    background: transparent !important;
-    gap: 0 !important;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    overflow: hidden;
+    gap: 4px;
+    background: var(--primary-50);
+    padding: 2px 6px 2px 2px;
+    border-radius: 14px;
+    border: 1px solid var(--primary-100);
     flex-shrink: 0;
+    height: 28px;
   }
   .user-avatar {
-    width: 32px; /* Kích thước ảnh đại diện tròn khớp hoàn hảo */
-    height: 32px;
+    width: 22px;
+    height: 22px;
     cursor: pointer;
     border-radius: 50%;
     border: 1px solid var(--primary-300);
+    object-fit: cover;
+  }
+  .user-name-header {
+    display: inline-block !important;
+    font-size: 0.72rem;
+    max-width: 48px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--gray-800);
+    font-weight: 600;
   }
   .btn-logout {
-    display: none !important; /* Ẩn nút đăng xuất trên mobile, khách hàng click vào avatar để đăng xuất */
+    display: inline-flex !important;
+    background: none;
+    border: none;
+    color: var(--gray-600);
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 2px;
   }
 
   .nav { top: 0; position: relative; }
