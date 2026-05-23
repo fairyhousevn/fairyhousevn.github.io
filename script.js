@@ -685,9 +685,11 @@ document.querySelectorAll('.nav-link[href^="#"]').forEach(link => {
 
 // Tự động active danh mục tương ứng khi cuộn trang
 if ('IntersectionObserver' in window) {
+  // Khoảng bù trừ tự động chuyển đổi theo thiết bị (Mobile siêu mảnh 95px, Desktop 165px)
+  const offsetHeight = window.innerWidth <= 768 ? 95 : 165;
   const observerOptions = {
     root: null,
-    rootMargin: '-165px 0px -50% 0px', // Khoảng bù trừ cho thanh menu dính mới
+    rootMargin: `-${offsetHeight}px 0px -50% 0px`,
     threshold: 0
   };
 

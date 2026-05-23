@@ -39,14 +39,21 @@
 
       <!-- Action Buttons -->
       <div class="header-actions">
+        <!-- Social Icons for Mobile -->
+        <div class="header-social-top">
+          <a href="https://www.facebook.com/profile.php?id=1062931456907313" target="_blank" class="social-icon fb" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://www.tiktok.com/@tienhouse67" target="_blank" class="social-icon tiktok" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="https://zalo.me/0378791667" target="_blank" class="social-icon zalo" title="Zalo"><i class="fa-solid fa-comment-dots"></i></a>
+        </div>
+
         <a href="tel:0378791667" class="action-hotline"><i class="fa-solid fa-phone"></i> 0378 791 667</a>
         <a href="https://zalo.me/0378791667" target="_blank" class="action-zalo"><i class="fa-solid fa-comment-dots"></i> Zalo</a>
         <button class="action-cart" id="headerCartBtn">
-          <i class="fa-solid fa-shopping-cart"></i> Giỏ hàng <span class="cart-count badge" id="headerCartCount">0</span>
+          <i class="fa-solid fa-shopping-cart"></i> <span class="cart-text">Giỏ hàng</span> <span class="cart-count badge" id="headerCartCount">0</span>
         </button>
         <div id="loginButtonsContainer" class="login-buttons-wrapper">
           <button class="google-login-btn" onclick="handleGoogleLogin()">
-            <i class="fa-brands fa-google"></i> Đăng nhập
+            <i class="fa-brands fa-google"></i> <span class="login-text">Đăng nhập</span>
           </button>
         </div>
         <div class="user-avatar-wrapper" id="userAvatarWrapper" style="display:none;">
