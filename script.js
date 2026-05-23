@@ -660,15 +660,54 @@ const scrollBtn = document.getElementById('scrollTop');
 window.addEventListener('scroll', () => { scrollBtn.classList.toggle('show', window.scrollY > 400); });
 scrollBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
 
+// Thêm hiệu ứng cuộn mượt khi click logo và xóa trạng thái active
+document.getElementById('logo')?.addEventListener('click', (e) => {
+  e.preventDefault();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+});
+
 document.querySelectorAll('.nav-link[href^="#"]').forEach(link => {
   link.addEventListener('click', (e) => {
     const href = link.getAttribute('href');
     if (href === '#') return;
     e.preventDefault();
     const target = document.querySelector(href);
-    if (target) { closeCartSidebar(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+    if (target) { 
+      closeCartSidebar(); 
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' }); 
+      // Cập nhật trạng thái active
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      link.classList.add('active');
+    }
   });
 });
+
+// Tự động active danh mục tương ứng khi cuộn trang
+if ('IntersectionObserver' in window) {
+  const observerOptions = {
+    root: null,
+    rootMargin: '-165px 0px -50% 0px', // Khoảng bù trừ cho thanh menu dính mới
+    threshold: 0
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.getAttribute('id');
+        const link = document.querySelector(`.nav-link[href="#${id}"]`);
+        if (link) {
+          document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+          link.classList.add('active');
+        }
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.products-section').forEach(section => {
+    observer.observe(section);
+  });
+}
 
 // START APP
 initApp();
