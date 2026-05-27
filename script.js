@@ -689,7 +689,7 @@ function createHearts() {
     'kitty2.png?v=20260527_v16',
     'kitty3.png?v=20260527_v16',
     'kitty4.png?v=20260527_v16',
-    'kitty5.png?v=20260527_v16'
+    'kitty5.png?v=20260527_kitty5pink'
   ];
   
   const isMobile = window.innerWidth < 768;
