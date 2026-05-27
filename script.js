@@ -174,7 +174,7 @@ async function initApp() {
                 images: imgs,
                 category: finalCat,
                 requiresModel: requiresModel,
-                description: getValByCol(row, fields, 'C', ['thông tin sản phẩm', 'thong tin san pham', 'description', 'mô tả', 'mo ta']) || "Sản phẩm chất lượng từ Tiên House.",
+                description: getValByCol(row, fields, 'C', ['thông tin sản phẩm', 'thong tin san pham', 'description', 'mô tả', 'mo ta']) || "Sản phẩm chất lượng từ Fairy House.",
                 stock: totalStock,
                 sold: sold
               };
@@ -419,7 +419,7 @@ function validateAndGetCartItem() {
   const existing = cart.find(item => item.cartId === cartId);
   const currentQty = existing ? existing.quantity : 0;
   if (currentQty + 1 > remaining) {
-    alert(`Không thể chọn thêm. Tiên House chỉ còn ${remaining} sản phẩm này trong kho!`);
+    alert(`Không thể chọn thêm. Fairy House chỉ còn ${remaining} sản phẩm này trong kho!`);
     return null;
   }
 
@@ -504,7 +504,7 @@ function changeQty(cartId, delta) {
       if (p) {
         const remaining = p.stock;
         if (item.quantity + delta > remaining) {
-          alert(`Không thể tăng thêm. Tiên House chỉ còn ${remaining} sản phẩm này trong kho!`);
+          alert(`Không thể tăng thêm. Fairy House chỉ còn ${remaining} sản phẩm này trong kho!`);
           return;
         }
       }
@@ -637,7 +637,7 @@ document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     return `${i+1}. [${item.code}] ${item.name}${m} | SL: ${item.quantity} | Giá: ${formatCurrency(item.priceNum)}`;
   }).join('\n');
 
-  const formattedOrder = `🛍️ ĐƠN HÀNG MỚI TỪ TIÊN HOUSE
+  const formattedOrder = `🛍️ ĐƠN HÀNG MỚI TỪ FAIRY HOUSE
 -----------------------------------
 👤 Khách hàng: ${custName}
 📱 Số điện thoại: ${custPhone}
@@ -785,7 +785,7 @@ if (!firebase.apps.length) {
 }
 const database = firebase.database();
 
-let currentUser = JSON.parse(localStorage.getItem('tienhouse_user') || 'null');
+let currentUser = JSON.parse(localStorage.getItem('fairyhouse_user') || localStorage.getItem('tienhouse_user') || 'null');
 let currentLikesRef = null;
 let currentCommentsRef = null;
 
@@ -828,7 +828,7 @@ function handleGoogleLogin() {
             picture: payload.picture, 
             sub: payload.sub 
           };
-          localStorage.setItem('tienhouse_user', JSON.stringify(currentUser));
+          localStorage.setItem('fairyhouse_user', JSON.stringify(currentUser));
           updateLoginUI();
           if (currentSelectedProduct) loadProductInteractions(currentSelectedProduct.id);
         })
@@ -845,6 +845,7 @@ function handleGoogleLogin() {
 
 function handleLogout() {
   currentUser = null;
+  localStorage.removeItem('fairyhouse_user');
   localStorage.removeItem('tienhouse_user');
   updateLoginUI();
   if (currentSelectedProduct) loadProductInteractions(currentSelectedProduct.id);
