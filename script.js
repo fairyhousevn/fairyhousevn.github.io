@@ -682,14 +682,53 @@ function closeSuccessModal() { document.getElementById('successModalOverlay').cl
 // ===== HIỆU ỨNG =====
 function createHearts() {
   const container = document.getElementById('floatingHearts');
+  if (!container) return;
   const hearts = ['✨', '💖', '🩷', '💗', '✨', '🎀', '🌸', '💝'];
-  for (let i = 0; i < 15; i++) {
+  
+  // Hello Kitty SVG template
+  const kittySvg = (size) => `
+    <svg width="${size}" height="${size * 0.8}" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg" style="display: block;">
+      <!-- Tai trai -->
+      <path d="M 25 35 L 20 15 L 38 23" stroke="black" stroke-width="4" fill="white" stroke-linejoin="round"/>
+      <!-- Tai phai -->
+      <path d="M 75 35 L 80 15 L 62 23" stroke="black" stroke-width="4" fill="white" stroke-linejoin="round"/>
+      <!-- Dau -->
+      <ellipse cx="50" cy="45" rx="35" ry="25" stroke="black" stroke-width="4" fill="white"/>
+      <!-- Mat -->
+      <ellipse cx="38" cy="42" rx="3.5" ry="5.5" fill="black"/>
+      <ellipse cx="62" cy="42" rx="3.5" ry="5.5" fill="black"/>
+      <!-- Mui -->
+      <ellipse cx="50" cy="49" rx="4" ry="2.5" fill="#ffd214"/>
+      <!-- Rau trai -->
+      <line x1="22" y1="43" x2="8" y2="40" stroke="black" stroke-width="3" stroke-linecap="round"/>
+      <line x1="20" y1="48" x2="6" y2="48" stroke="black" stroke-width="3" stroke-linecap="round"/>
+      <line x1="22" y1="53" x2="8" y2="56" stroke="black" stroke-width="3" stroke-linecap="round"/>
+      <!-- Rau phai -->
+      <line x1="78" y1="43" x2="92" y2="40" stroke="black" stroke-width="3" stroke-linecap="round"/>
+      <line x1="80" y1="48" x2="94" y2="48" stroke="black" stroke-width="3" stroke-linecap="round"/>
+      <line x1="78" y1="53" x2="92" y2="56" stroke="black" stroke-width="3" stroke-linecap="round"/>
+      <!-- No do -->
+      <ellipse cx="63" cy="22" rx="8" ry="6" fill="#ff2d55" stroke="black" stroke-width="2.5" transform="rotate(-15 63 22)"/>
+      <ellipse cx="77" cy="24" rx="8" ry="6" fill="#ff2d55" stroke="black" stroke-width="2.5" transform="rotate(15 77 24)"/>
+      <circle cx="70" cy="24" r="4.5" fill="#ff2d55" stroke="black" stroke-width="2.5"/>
+    </svg>
+  `;
+
+  // Tao 25 hat bay
+  for (let i = 0; i < 25; i++) {
     const span = document.createElement('span');
-    span.textContent = hearts[Math.floor(Math.random() * hearts.length)];
     span.style.left = Math.random() * 100 + '%';
     span.style.animationDuration = (6 + Math.random() * 8) + 's';
-    span.style.animationDelay = Math.random() * 10 + 's';
-    span.style.fontSize = (14 + Math.random() * 18) + 'px';
+    span.style.animationDelay = Math.random() * 12 + 's';
+    
+    // 35% co hoi la Kitty, con lai la trai tim/lap lanh
+    if (Math.random() < 0.35) {
+      const size = (20 + Math.random() * 15); // Kich thuoc 20px - 35px
+      span.innerHTML = kittySvg(size);
+    } else {
+      span.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+      span.style.fontSize = (14 + Math.random() * 18) + 'px';
+    }
     container.appendChild(span);
   }
 }
