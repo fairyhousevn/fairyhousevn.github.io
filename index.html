@@ -2,13 +2,42 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <script>
+    // Tự động kiểm tra phiên bản mới từ server để chống cache index.html
+    (function() {
+      const CURRENT_VERSION = "20260527_v4";
+      if (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return;
+      }
+      fetch('version.json?t=' + Date.now())
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.version && data.version !== CURRENT_VERSION) {
+            var lastReload = localStorage.getItem('last_version_reload_time');
+            var now = Date.now();
+            if (!lastReload || (now - parseInt(lastReload) > 15000)) {
+              localStorage.setItem('last_version_reload_time', now.toString());
+              var sep = window.location.search ? '&' : '?';
+              var newSearch = window.location.search;
+              if (newSearch.indexOf('v=') >= 0) {
+                newSearch = newSearch.replace(/v=[^&]*/, 'v=' + data.version);
+              } else {
+                newSearch += sep + 'v=' + data.version;
+              }
+              window.location.href = window.location.pathname + newSearch + window.location.hash;
+            }
+          }
+        })
+        .catch(function(err) { console.warn("Lỗi kiểm tra phiên bản:", err); });
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Fairy House - Phụ Kiện Xinh & Quà Lưu Niệm Dễ Thương</title>
   <meta name="description" content="Fairy House - Chuyên phụ kiện xinh, móc khoá trend và quà lưu niệm dễ thương. Tiện lợi mỗi ngày. Chợ Mỹ Luông, An Giang.">
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="style.css?v=20260527_v3">
+  <link rel="stylesheet" href="style.css?v=20260527_v4">
   <!-- FontAwesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="icon" href="logo.jpg">
@@ -392,6 +421,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="script.js?v=20260527_v3"></script>
+  <script src="script.js?v=20260527_v4"></script>
 </body>
 </html>
