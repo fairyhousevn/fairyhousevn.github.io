@@ -5,8 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tiên House - Phụ Kiện Xinh, Ốp Lưng & Quà Lưu Niệm</title>
   <meta name="description" content="Tiên House - Chuyên phụ kiện xinh, ốp lưng, móc khoá và quà lưu niệm dễ thương. Tiện lợi mỗi ngày. Chợ Mỹ Luông, An Giang.">
+  <style>
+    html { visibility: hidden; }
+  </style>
   <script>
-    document.write('<link rel="stylesheet" href="style.css?v=' + new Date().getTime() + '">');
+    (function() {
+      var v = new Date().getTime();
+      var link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = 'style.css?v=' + v;
+      link.onload = function() {
+        document.documentElement.style.visibility = 'visible';
+      };
+      document.head.appendChild(link);
+      
+      // Fallback
+      setTimeout(function() {
+        document.documentElement.style.visibility = 'visible';
+      }, 1200);
+    })();
   </script>
   <!-- FontAwesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -390,7 +407,13 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script>
-    document.write('<script src="script.js?v=' + new Date().getTime() + '"><\/script>');
+    (function() {
+      var v = new Date().getTime();
+      var script = document.createElement('script');
+      script.src = 'script.js?v=' + v;
+      script.async = false;
+      document.body.appendChild(script);
+    })();
   </script>
 </body>
 </html>
