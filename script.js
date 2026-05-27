@@ -685,11 +685,11 @@ function createHearts() {
   if (!container) return;
   
   const kittyImages = [
-    'kitty1.png?v=20260527_v12',
-    'kitty2.png?v=20260527_v12',
-    'kitty3.png?v=20260527_v12',
-    'kitty4.png?v=20260527_v12',
-    'kitty5.png?v=20260527_v12'
+    'kitty1.png?v=20260527_v13',
+    'kitty2.png?v=20260527_v13',
+    'kitty3.png?v=20260527_v13',
+    'kitty4.png?v=20260527_v13',
+    'kitty5.png?v=20260527_v13'
   ];
   
   // Tao 60 hat Kitty mau hong bay lien tuc voi 5 kieu dang de thuong khac nhau
@@ -699,7 +699,7 @@ function createHearts() {
     span.style.animationDuration = (15 + Math.random() * 15) + 's';
     span.style.animationDelay = Math.random() * 12 + 's';
     
-    const size = (24 + Math.random() * 16); // Kich thuoc 24px - 40px
+    const size = (36 + Math.random() * 24); // Kich thuoc 36px - 60px
     const imgIndex = Math.floor(Math.random() * kittyImages.length);
     
     const img = document.createElement('img');
