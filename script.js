@@ -174,7 +174,7 @@ async function initApp() {
                 images: imgs,
                 category: finalCat,
                 requiresModel: requiresModel,
-                description: getValByCol(row, fields, 'C', ['thông tin sản phẩm', 'thong tin san pham', 'description', 'mô tả', 'mo ta']) || "Sản phẩm chất lượng từ Fairy House.",
+                description: getValByCol(row, fields, 'C', ['thông tin sản phẩm', 'thong tin san pham', 'description', 'mô tả', 'mo ta']) || "Sản phẩm chất lượng từ Tiên House.",
                 stock: totalStock,
                 sold: sold
               };
@@ -419,7 +419,7 @@ function validateAndGetCartItem() {
   const existing = cart.find(item => item.cartId === cartId);
   const currentQty = existing ? existing.quantity : 0;
   if (currentQty + 1 > remaining) {
-    alert(`Không thể chọn thêm. Fairy House chỉ còn ${remaining} sản phẩm này trong kho!`);
+    alert(`Không thể chọn thêm. Tiên House chỉ còn ${remaining} sản phẩm này trong kho!`);
     return null;
   }
 
@@ -504,7 +504,7 @@ function changeQty(cartId, delta) {
       if (p) {
         const remaining = p.stock;
         if (item.quantity + delta > remaining) {
-          alert(`Không thể tăng thêm. Fairy House chỉ còn ${remaining} sản phẩm này trong kho!`);
+          alert(`Không thể tăng thêm. Tiên House chỉ còn ${remaining} sản phẩm này trong kho!`);
           return;
         }
       }
@@ -637,7 +637,7 @@ document.getElementById('checkoutForm').addEventListener('submit', function(e) {
     return `${i+1}. [${item.code}] ${item.name}${m} | SL: ${item.quantity} | Giá: ${formatCurrency(item.priceNum)}`;
   }).join('\n');
 
-  const formattedOrder = `🛍️ ĐƠN HÀNG MỚI TỪ FAIRY HOUSE
+  const formattedOrder = `🛍️ ĐƠN HÀNG MỚI TỪ TIÊN HOUSE
 -----------------------------------
 👤 Khách hàng: ${custName}
 📱 Số điện thoại: ${custPhone}
