@@ -685,11 +685,11 @@ function createHearts() {
   if (!container) return;
   
   const kittyImages = [
-    'kitty1.png',
-    'kitty2.png',
-    'kitty3.png',
-    'kitty4.png',
-    'kitty5.png'
+    'kitty1.png?v=20260527_v11',
+    'kitty2.png?v=20260527_v11',
+    'kitty3.png?v=20260527_v11',
+    'kitty4.png?v=20260527_v11',
+    'kitty5.png?v=20260527_v11'
   ];
   
   // Tao 60 hat Kitty mau hong bay lien tuc voi 5 kieu dang de thuong khac nhau
