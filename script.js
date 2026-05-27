@@ -685,15 +685,15 @@ function createHearts() {
   if (!container) return;
   
   const kittyImages = [
-    'kitty1.png?v=20260527_v15',
-    'kitty2.png?v=20260527_v15',
-    'kitty3.png?v=20260527_v15',
-    'kitty4.png?v=20260527_v15',
-    'kitty5.png?v=20260527_v15'
+    'kitty1.png?v=20260527_v16',
+    'kitty2.png?v=20260527_v16',
+    'kitty3.png?v=20260527_v16',
+    'kitty4.png?v=20260527_v16',
+    'kitty5.png?v=20260527_v16'
   ];
   
   const isMobile = window.innerWidth < 768;
-  const count = isMobile ? 25 : 60;
+  const count = 30;
   const baseSize = isMobile ? 35 : 60;
   const sizeVar = isMobile ? 25 : 40;
   
