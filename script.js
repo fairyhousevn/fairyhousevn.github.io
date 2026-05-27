@@ -684,103 +684,31 @@ function createHearts() {
   const container = document.getElementById('floatingHearts');
   if (!container) return;
   
-  // Hello Kitty SVG template generator for 5 different cute styles (All themed in sweet pink)
-  const kittySvg = (size, type) => {
-    let eyesHtml = '';
-    let bowHtml = '';
-    
-    // Eyes configuration based on kitty type
-    if (type === 1) {
-      // Type 1: Winking Kitty (Left eye wink, right eye open)
-      eyesHtml = `
-        <path d="M 34 44 Q 38 40 42 44" stroke="black" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-        <ellipse cx="62" cy="42" rx="3.5" ry="5.5" fill="black"/>
-      `;
-    } else if (type === 2) {
-      // Type 2: Heart Eyes (Cute hot pink hearts for eyes)
-      eyesHtml = `
-        <path d="M 38 46 L 33 41 A 3 3 0 0 1 38 37 A 3 3 0 0 1 43 41 Z" fill="#ff2d55"/>
-        <path d="M 62 46 L 57 41 A 3 3 0 0 1 62 37 A 3 3 0 0 1 67 41 Z" fill="#ff2d55"/>
-      `;
-    } else if (type === 3) {
-      // Type 3: Sleepy/Happy Eyes (Smiling eyes ^ ^)
-      eyesHtml = `
-        <path d="M 34 44 Q 38 39 42 44" stroke="black" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-        <path d="M 58 44 Q 62 39 66 44" stroke="black" stroke-width="3.5" fill="none" stroke-linecap="round"/>
-      `;
-    } else {
-      // Type 0 & 4: Normal circular eyes
-      eyesHtml = `
-        <ellipse cx="38" cy="42" rx="3.5" ry="5.5" fill="black"/>
-        <ellipse cx="62" cy="42" rx="3.5" ry="5.5" fill="black"/>
-      `;
-    }
-
-    // Bow or Flower accessories based on kitty type (All sweet shades of pink)
-    if (type === 4) {
-      // Type 4: Flower Kitty (Hot pink flower with deep cherry pink center on right ear)
-      bowHtml = `
-        <circle cx="70" cy="17" r="4.5" fill="#ffa6c9" stroke="black" stroke-width="2"/>
-        <circle cx="76" cy="21" r="4.5" fill="#ffa6c9" stroke="black" stroke-width="2"/>
-        <circle cx="74" cy="28" r="4.5" fill="#ffa6c9" stroke="black" stroke-width="2"/>
-        <circle cx="65" cy="28" r="4.5" fill="#ffa6c9" stroke="black" stroke-width="2"/>
-        <circle cx="64" cy="21" r="4.5" fill="#ffa6c9" stroke="black" stroke-width="2"/>
-        <circle cx="70" cy="24" r="4" fill="#ff4d6d" stroke="black" stroke-width="2"/>
-      `;
-    } else {
-      // Standard Bow loops with different cute pink colors
-      let bowColor = "#ff7088"; // Type 0: Sweet rose pink
-      if (type === 1) {
-        bowColor = "#ff8ca0"; // Type 1: Coral pink
-      } else if (type === 2) {
-        bowColor = "#fba9b8"; // Type 2: Pastel pink
-      } else if (type === 3) {
-        bowColor = "#ffccd5"; // Type 3: Soft blush pink
-      }
-      bowHtml = `
-        <ellipse cx="63" cy="22" rx="8" ry="6" fill="${bowColor}" stroke="black" stroke-width="2.5" transform="rotate(-15 63 22)"/>
-        <ellipse cx="77" cy="24" rx="8" ry="6" fill="${bowColor}" stroke="black" stroke-width="2.5" transform="rotate(15 77 24)"/>
-        <circle cx="70" cy="24" r="4.5" fill="${bowColor}" stroke="black" stroke-width="2.5"/>
-      `;
-    }
-
-    return `
-      <svg width="${size}" height="${size * 0.8}" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg" style="display: block;">
-        <!-- Tai trai -->
-        <path d="M 25 35 L 20 15 L 38 23" stroke="black" stroke-width="4" fill="#ffe5ec" stroke-linejoin="round"/>
-        <!-- Tai phai -->
-        <path d="M 75 35 L 80 15 L 62 23" stroke="black" stroke-width="4" fill="#ffe5ec" stroke-linejoin="round"/>
-        <!-- Dau (Mau hong pastel dang yeu) -->
-        <ellipse cx="50" cy="45" rx="35" ry="25" stroke="black" stroke-width="4" fill="#ffe5ec"/>
-        <!-- Mat -->
-        ${eyesHtml}
-        <!-- Mui -->
-        <ellipse cx="50" cy="49" rx="4" ry="2.5" fill="#ffd214"/>
-        <!-- Rau trai -->
-        <line x1="22" y1="43" x2="8" y2="40" stroke="black" stroke-width="3" stroke-linecap="round"/>
-        <line x1="20" y1="48" x2="6" y2="48" stroke="black" stroke-width="3" stroke-linecap="round"/>
-        <line x1="22" y1="53" x2="8" y2="56" stroke="black" stroke-width="3" stroke-linecap="round"/>
-        <!-- Rau phai -->
-        <line x1="78" y1="43" x2="92" y2="40" stroke="black" stroke-width="3" stroke-linecap="round"/>
-        <line x1="80" y1="48" x2="94" y2="48" stroke="black" stroke-width="3" stroke-linecap="round"/>
-        <line x1="78" y1="53" x2="92" y2="56" stroke="black" stroke-width="3" stroke-linecap="round"/>
-        <!-- No / Hoa -->
-        ${bowHtml}
-      </svg>
-    `;
-  };
-
-  // Tao 40 hat Kitty mau hong bay lien tuc voi 5 kieu dang de thuong khac nhau
-  for (let i = 0; i < 40; i++) {
+  const kittyImages = [
+    'kitty1.png',
+    'kitty2.png',
+    'kitty3.png',
+    'kitty4.png',
+    'kitty5.png'
+  ];
+  
+  // Tao 60 hat Kitty mau hong bay lien tuc voi 5 kieu dang de thuong khac nhau
+  for (let i = 0; i < 60; i++) {
     const span = document.createElement('span');
     span.style.left = Math.random() * 100 + '%';
     span.style.animationDuration = (6 + Math.random() * 8) + 's';
     span.style.animationDelay = Math.random() * 12 + 's';
     
-    const size = (20 + Math.random() * 15); // Kich thuoc 20px - 35px
-    const kittyType = Math.floor(Math.random() * 5); // Chon ngau nhien tu 5 kieu (0 -> 4)
-    span.innerHTML = kittySvg(size, kittyType);
+    const size = (24 + Math.random() * 16); // Kich thuoc 24px - 40px
+    const imgIndex = Math.floor(Math.random() * kittyImages.length);
     
+    const img = document.createElement('img');
+    img.src = kittyImages[imgIndex];
+    img.style.width = size + 'px';
+    img.style.height = 'auto';
+    img.style.display = 'block';
+    
+    span.appendChild(img);
     container.appendChild(span);
   }
 }

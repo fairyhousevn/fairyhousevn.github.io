@@ -38,13 +38,14 @@ body {
   pointer-events: none; z-index: 0; overflow: hidden;
 }
 .floating-hearts span {
-  position: absolute; display: block; font-size: 20px;
-  animation: floatUp 8s linear infinite; opacity: 0.2;
+  position: absolute; display: block;
+  animation: floatUp 8s linear infinite; opacity: 0.35;
+  will-change: transform;
 }
 @keyframes floatUp {
   0% { transform: translateY(100vh) rotate(0deg); opacity:0; }
-  10% { opacity: 0.2; }
-  90% { opacity: 0.2; }
+  10% { opacity: 0.35; }
+  90% { opacity: 0.35; }
   100% { transform: translateY(-10vh) rotate(720deg); opacity:0; }
 }
 
