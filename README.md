@@ -1,6 +1,6 @@
-# Tiên Case Xinh 🌸
+# Fairy House 🌸
 
-Website giới thiệu và bán ốp lưng điện thoại dễ thương.
+Website giới thiệu và bán phụ kiện xinh Kitty, móc khoá và quà lưu niệm dễ thương.
 
 ## Tính năng
 - Danh sách sản phẩm "Hàng Mới" cập nhật liên tục.
@@ -12,5 +12,5 @@ Website giới thiệu và bán ốp lưng điện thoại dễ thương.
 Mở file `index.html` bằng trình duyệt để xem website.
 
 ## Thông tin cửa hàng
-- **Địa chỉ:** Mỹ Luông, An Giang
-- **SĐT/Zalo:** 0988 882 700
+- **Địa chỉ:** Chợ Mỹ Luông, An Giang
+- **SĐT/Zalo:** 0378 791 667
