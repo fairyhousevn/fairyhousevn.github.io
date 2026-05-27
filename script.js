@@ -685,21 +685,26 @@ function createHearts() {
   if (!container) return;
   
   const kittyImages = [
-    'kitty1.png?v=20260527_v14',
-    'kitty2.png?v=20260527_v14',
-    'kitty3.png?v=20260527_v14',
-    'kitty4.png?v=20260527_v14',
-    'kitty5.png?v=20260527_v14'
+    'kitty1.png?v=20260527_v15',
+    'kitty2.png?v=20260527_v15',
+    'kitty3.png?v=20260527_v15',
+    'kitty4.png?v=20260527_v15',
+    'kitty5.png?v=20260527_v15'
   ];
   
-  // Tao 60 hat Kitty mau hong bay lien tuc voi 5 kieu dang de thuong khac nhau
-  for (let i = 0; i < 60; i++) {
+  const isMobile = window.innerWidth < 768;
+  const count = isMobile ? 25 : 60;
+  const baseSize = isMobile ? 35 : 60;
+  const sizeVar = isMobile ? 25 : 40;
+  
+  // Tao hat Kitty mau hong bay lien tuc voi 5 kieu dang de thuong khac nhau
+  for (let i = 0; i < count; i++) {
     const span = document.createElement('span');
     span.style.left = Math.random() * 100 + '%';
     span.style.animationDuration = (15 + Math.random() * 15) + 's';
     span.style.animationDelay = Math.random() * 12 + 's';
     
-    const size = (60 + Math.random() * 40); // Kich thuoc 60px - 100px
+    const size = (baseSize + Math.random() * sizeVar);
     const imgIndex = Math.floor(Math.random() * kittyImages.length);
     
     const img = document.createElement('img');
