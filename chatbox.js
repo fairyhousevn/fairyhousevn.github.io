@@ -31,7 +31,16 @@
   async function fetchConfig() {
     if (_rk && _ru) return;
     try {
-      const response = await fetch('/api/get-config');
+      // Tự động sử dụng production Vercel URL khi chạy tại localhost hoặc GitHub Pages
+      let apiUrl = '/api/get-config';
+      if (typeof window !== 'undefined' && window.location && window.location.hostname) {
+        const hostname = window.location.hostname;
+        if (hostname !== 'fairyhouse.vercel.app' && hostname !== '') {
+          apiUrl = 'https://fairyhouse.vercel.app/api/get-config';
+        }
+      }
+
+      const response = await fetch(apiUrl);
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       _rk = decodeValue(data.ek);
@@ -506,8 +515,8 @@ ${productContext}`;
 
   // ===== GỌI API 9ROUTER TRỰC TIẾP =====
   async function callGemini(userMessage) {
-    let retries = 1;
-    let delay = 1000;
+    let retries = 1; // Tổng cộng 2 lượt thử: 1 chính + 1 retry
+    const retryDelay = 5000; // Giãn cách 5 giây giữa các lượt thử để hệ thống/tunnel tự phục hồi
 
     // 1. Tải cấu hình bảo mật nếu chưa có
     try {
@@ -541,9 +550,14 @@ ${productContext}`;
     };
 
     while (retries >= 0) {
+      const attemptNumber = 2 - retries;
+      console.log(`[9Router API] Bắt đầu lượt thử ${attemptNumber}/2...`);
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+        const timeoutId = setTimeout(() => {
+          console.warn(`[9Router API] Lượt thử ${attemptNumber} vượt quá 60 giây! Đang hủy request...`);
+          controller.abort();
+        }, API_TIMEOUT_MS);
 
         const response = await fetch(_ru, {
           method: 'POST',
@@ -564,35 +578,99 @@ ${productContext}`;
         }
 
         const rawText = await response.text();
+        console.log(`[9Router API] Phản hồi thô nhận được (Lượt thử ${attemptNumber}):`, rawText);
         
-        // Loại bỏ phần "data: [DONE]" lỗi của 9Router ở cuối JSON (nếu có)
+        let aiText = '';
+        let data = null;
         let cleanText = rawText.trim();
+
+        // 1. Nếu có đuôi "data: [DONE]", cắt bỏ nó trước
         if (cleanText.endsWith('data: [DONE]')) {
           cleanText = cleanText.substring(0, cleanText.length - 12).trim();
         }
 
-        let data;
+        // BỘ PHÂN TÍCH PHẢN HỒI SIÊU BỀN BỈ (SUPER-ROBUST PARSER)
         try {
+          // Kịch bản A: JSON hoàn chỉnh sạch sẽ
           data = JSON.parse(cleanText);
         } catch (parseError) {
-          // Khôi phục nâng cao bằng cách tìm vật thể JSON { ... }
-          const firstBrace = cleanText.indexOf('{');
-          const lastBrace = cleanText.lastIndexOf('}');
-          if (firstBrace !== -1 && lastBrace !== -1) {
-            cleanText = cleanText.substring(firstBrace, lastBrace + 1);
-            data = JSON.parse(cleanText);
-          } else {
-            throw parseError;
+          // Kịch bản B: SSE (Server-Sent Events) Stream dạng các dòng bắt đầu bằng "data:"
+          if (cleanText.includes('data:')) {
+            console.log('[9Router API] Phát hiện cấu trúc dữ liệu dạng SSE Stream. Đang tự động gộp dữ liệu...');
+            const lines = cleanText.split('\n');
+            let accumulatedContent = '';
+            let parsedAnyLine = false;
+
+            for (let line of lines) {
+              line = line.trim();
+              if (line.startsWith('data:')) {
+                const dataPart = line.substring(5).trim();
+                if (dataPart && dataPart !== '[DONE]') {
+                  try {
+                    const chunk = JSON.parse(dataPart);
+                    parsedAnyLine = true;
+                    if (chunk.choices && chunk.choices[0]) {
+                      const choice = chunk.choices[0];
+                      const deltaText = (choice.delta && choice.delta.content) || 
+                                        (choice.message && choice.message.content) || 
+                                        choice.text || '';
+                      accumulatedContent += deltaText;
+                    }
+                  } catch (chunkError) {
+                    // Bỏ qua lỗi cú pháp nhỏ trên từng dòng stream
+                  }
+                }
+              }
+            }
+
+            if (parsedAnyLine && accumulatedContent.trim()) {
+              aiText = accumulatedContent;
+            }
+          }
+
+          // Kịch bản C: Khôi phục nâng cao bằng cách trích xuất đối tượng JSON { ... } lớn nhất
+          if (!aiText) {
+            console.log('[9Router API] Parsing trực tiếp lỗi. Cố gắng trích xuất đối tượng JSON { ... } lớn nhất...');
+            const firstBrace = cleanText.indexOf('{');
+            const lastBrace = cleanText.lastIndexOf('}');
+            if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+              try {
+                const extractedJson = cleanText.substring(firstBrace, lastBrace + 1);
+                data = JSON.parse(extractedJson);
+              } catch (extractError) {
+                console.warn('[9Router API] Không thể trích xuất JSON phụ:', extractError);
+              }
+            }
           }
         }
 
-        let aiText = '';
-        if (data.choices && data.choices[0] && data.choices[0].message) {
-          aiText = data.choices[0].message.content;
+        // Nếu đã parse được JSON hợp lệ ở Kịch bản A hoặc Kịch bản C
+        if (data) {
+          if (data.choices && data.choices[0]) {
+            const choice = data.choices[0];
+            aiText = (choice.message && choice.message.content) || choice.text || '';
+          } else if (data.content) {
+            aiText = data.content;
+          } else if (data.text) {
+            aiText = data.text;
+          } else if (data.output) {
+            aiText = data.output;
+          }
+        }
+
+        // Kịch bản D: Phản hồi trả về Text thuần trực tiếp (Không có cấu trúc JSON và không phải HTML lỗi)
+        if (!aiText && cleanText && !cleanText.startsWith('<')) {
+          console.log('[9Router API] Coi phản hồi không cấu trúc là Text thuần của AI.');
+          aiText = cleanText;
+        }
+
+        // Loại bỏ thẻ suy nghĩ <think>...</think> (nếu có từ DeepSeek-R1)
+        if (aiText) {
+          aiText = aiText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
         }
 
         if (!aiText) {
-          throw new Error('Phản hồi rỗng từ 9Router API');
+          throw new Error('Không thể trích xuất nội dung văn bản hợp lệ từ API.');
         }
 
         // Lưu lịch sử chat
@@ -604,17 +682,17 @@ ${productContext}`;
         // Ẩn typing và hiển thị tin nhắn
         hideTyping();
         addMessage('ai', aiText, mentionedProducts);
-        return; // Thành công, thoát khỏi vòng lặp retry
+        return; // Thành công hoàn toàn, kết thúc vòng lặp
 
       } catch (error) {
-        console.warn(`Lỗi gọi API 9Router (còn ${retries} lượt thử lại):`, error);
+        console.warn(`[9Router API] Thất bại ở lượt thử ${attemptNumber} (còn ${retries} lượt thử lại):`, error);
         
         if (retries > 0) {
           retries--;
-          await new Promise(resolve => setTimeout(resolve, delay));
-          delay *= 2; // Exponential backoff
+          console.log(`[9Router API] Gặp sự cố kết nối. Chờ đợi ${retryDelay / 1000} giây trước khi gửi lại lượt thử 2...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
         } else {
-          // Hết lượt thử lại, báo lỗi cho người dùng
+          // Hết tất cả lượt thử lại, báo lỗi cho người dùng
           hideTyping();
           const errorMsg = 'Fairy gặp chút trục trặc kết nối rồi 😢 Bạn thử nhắn lại sau chút nhé! Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ ngay nha! 💕';
           addMessage('error', errorMsg);
