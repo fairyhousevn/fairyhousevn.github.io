@@ -103,9 +103,7 @@
   right: 24px;
   width: 380px;
   height: 520px;
-  background: rgba(255, 255, 255, 0.97);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 10px 40px rgba(247, 77, 123, 0.2),
               0 0 0 1px rgba(247, 77, 123, 0.08);
@@ -119,6 +117,7 @@
   pointer-events: none;
   transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
               opacity 0.25s ease;
+  will-change: transform, opacity;
 }
 .chatbox-window.open {
   transform: scale(1) translateY(0);
@@ -614,18 +613,5 @@
   display: none !important; /* Vô hiệu hóa overlay để lộ sản phẩm phía sau */
 }
 
-/* ===== SMOOTH SHIFT TO PREVENT OVERLAPPING PRODUCTS ===== */
-.products-section,
-.map-section,
-.footer-inner {
-  transition: padding-right 0.3s ease !important;
-}
 
-@media (min-width: 769px) {
-  body.chatbox-is-open .products-section,
-  body.chatbox-is-open .map-section,
-  body.chatbox-is-open .footer-inner {
-    padding-right: 420px !important;
-  }
-}
 
