@@ -5,13 +5,13 @@
 (function() {
   'use strict';
 
-  // ===== CẤU HÌNH =====
-  const GEMINI_API_KEY = "AIzaSyBiK_Lk3ZRv3oYq6pq3AjgwU6PHArY_VxE";
-  const GEMINI_MODEL = "gemini-2.5-flash";
-  const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+  // ===== CẤU HÌNH 9ROUTER PROXY =====
+  const NINE_ROUTER_KEY = "sk-50ed9f833897dfa8-314oks-2608b897";
+  const NINE_ROUTER_MODEL = "chatboxweb";
+  const NINE_ROUTER_API_URL = "https://rlf2des.abc-tunnel.us/v1/chat/completions";
   
-  const MAX_HISTORY = 6; // Giảm context giúp tiết kiệm token quota
-  const RATE_LIMIT_MS = 5000; // Giới hạn 1 tin / 5 giây để tránh vượt rate limit free tier
+  const MAX_HISTORY = 6; // Giới hạn context lịch sử chat
+  const RATE_LIMIT_MS = 2000; // Khôi phục rate limit 2 giây vì 9Router có cơ chế xoay vòng miễn phí tốt
   const API_TIMEOUT_MS = 30000; // Timeout 30 giây
 
   // ===== SYSTEM PROMPT =====
@@ -214,12 +214,12 @@ ${productContext}`;
     addMessage('user', text);
 
     // Add to history
-    chatHistory.push({ role: 'user', parts: [{ text: text }] });
-
+    chatHistory.push({ role: 'user', content: text });
+ 
     // Show typing indicator
     showTyping();
-
-    // Call Gemini API
+ 
+    // Call 9Router API
     callGemini(text);
   }
 
@@ -319,44 +319,33 @@ ${productContext}`;
     document.getElementById('chatboxSendBtn').disabled = false;
   }
 
-  // ===== GỌI GEMINI API =====
+  // ===== GỌI 9ROUTER API =====
   async function callGemini(userMessage, retries = 1) {
     try {
-      // Build request body
       const systemPrompt = buildSystemPrompt();
-      
-      // Prepare conversation history (limited)
       const historySlice = chatHistory.slice(-MAX_HISTORY);
 
+      // Cấu trúc request body chuẩn OpenAI API để gửi tới 9Router
+      const messages = [
+        { role: 'system', content: systemPrompt },
+        ...historySlice
+      ];
+
       const requestBody = {
-        system_instruction: {
-          parts: [{ text: systemPrompt }]
-        },
-        contents: historySlice,
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.9,
-          topK: 40,
-          maxOutputTokens: 2000,
-          thinkingConfig: {
-            thinkingBudget: 0
-          }
-        },
-        safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" }
-        ]
+        model: NINE_ROUTER_MODEL,
+        messages: messages,
+        max_tokens: 2000
       };
 
-      // API call with timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
-      const response = await fetch(GEMINI_API_URL, {
+      const response = await fetch(NINE_ROUTER_API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${NINE_ROUTER_KEY}`
+        },
         body: JSON.stringify(requestBody),
         signal: controller.signal
       });
@@ -364,35 +353,38 @@ ${productContext}`;
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        // Nếu bị rate limit (429) và còn lần thử lại → chờ 3 giây rồi gửi lại
-        if (response.status === 429 && retries > 0) {
-          console.warn('Rate limited. Retrying in 3s...');
-          await new Promise(resolve => setTimeout(resolve, 3000));
-          return callGemini(userMessage, retries - 1);
-        }
-        // Nếu lỗi server tạm thời (5xx) và còn lần thử lại
-        if (response.status >= 500 && retries > 0) {
-          console.warn(`Server error ${response.status}. Retrying in 3s...`);
+        // Hỗ trợ tự động thử lại nếu gặp lỗi từ 9Router
+        if ((response.status === 429 || response.status >= 500) && retries > 0) {
+          console.warn(`9Router returned ${response.status}. Retrying in 3s...`);
           await new Promise(resolve => setTimeout(resolve, 3000));
           return callGemini(userMessage, retries - 1);
         }
         throw new Error(`API error: ${response.status}`);
       }
 
-      const data = await response.json();
-      
-      // Extract response text
+      // 9Router có thể trả về text thô chứa chuỗi JSON kèm theo các ký tự xuống dòng và text thừa như "data: [DONE]"
+      const rawText = await response.text();
       let aiText = '';
-      if (data.candidates && data.candidates[0] && data.candidates[0].content) {
-        aiText = data.candidates[0].content.parts.map(p => p.text).join('');
+
+      try {
+        // Sử dụng Regex để tìm đối tượng JSON đầu tiên {...} xuất hiện trong chuỗi thô
+        const jsonMatch = rawText.match(/\{[\s\S]*?\}/);
+        if (jsonMatch) {
+          const data = JSON.parse(jsonMatch[0]);
+          if (data.choices && data.choices[0] && data.choices[0].message) {
+            aiText = data.choices[0].message.content;
+          }
+        }
+      } catch (parseErr) {
+        console.error('Failed to parse 9Router JSON:', parseErr);
       }
 
       if (!aiText) {
-        throw new Error('Empty response');
+        throw new Error('Could not extract text response from 9Router');
       }
 
       // Add to history
-      chatHistory.push({ role: 'model', parts: [{ text: aiText }] });
+      chatHistory.push({ role: 'assistant', content: aiText });
 
       // Find mentioned products
       const mentionedProducts = findMentionedProducts(aiText);
@@ -402,7 +394,7 @@ ${productContext}`;
       addMessage('ai', aiText, mentionedProducts);
 
     } catch (error) {
-      console.error('Gemini API Error:', error);
+      console.error('9Router API Error:', error);
       hideTyping();
 
       let errorMsg = 'Fairy đang bận trả lời khách khác, bạn chờ chút rồi thử lại nhé! 💕 Hoặc liên hệ Zalo <strong>0378 791 667</strong> để được hỗ trợ nhanh!';
@@ -493,7 +485,17 @@ ${productContext}`;
       
       if (savedHtml && savedHistory) {
         document.getElementById('chatboxMessages').innerHTML = savedHtml;
-        chatHistory = JSON.parse(savedHistory);
+        const parsedHistory = JSON.parse(savedHistory);
+        
+        // Chuẩn hóa định dạng lịch sử cũ (Gemini) sang định dạng mới (OpenAI/9Router) nếu cần
+        chatHistory = parsedHistory.map(item => {
+          if (item.parts && Array.isArray(item.parts)) {
+            const text = item.parts.map(p => p.text).join('');
+            const role = item.role === 'model' ? 'assistant' : 'user';
+            return { role, content: text };
+          }
+          return item;
+        });
         
         // Hide quick replies if there are messages
         if (chatHistory.length > 0) {
