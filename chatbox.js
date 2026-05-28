@@ -559,41 +559,30 @@ ${productContext}`;
     }
   }
 
+  // ===== TÍNH TOÁN VỊ TRÍ TƯƠNG ĐỐI TRÁNH ẢNH HƯỞNG ANIMATION =====
+  function getRelativeOffsetTop(element, container) {
+    let offsetTop = 0;
+    let curr = element;
+    while (curr && curr !== container) {
+      offsetTop += curr.offsetTop;
+      curr = curr.offsetParent;
+    }
+    return offsetTop;
+  }
+
   // ===== SCROLL TO MESSAGE =====
   function scrollToMessage(msgDiv, behavior = 'smooth') {
     const messagesEl = document.getElementById('chatboxMessages');
     if (messagesEl && msgDiv) {
-      // 1. Thực hiện cuộn ngay lập tức không mượt để định vị tin nhắn trước, tránh browser tự động cuộn xuống bottom
-      const containerTop = messagesEl.getBoundingClientRect().top;
-      const msgTop = msgDiv.getBoundingClientRect().top;
-      const scrollOffset = msgTop - containerTop + messagesEl.scrollTop;
-      
-      messagesEl.scrollTo({
-        top: scrollOffset - 8,
-        behavior: 'auto'
-      });
-
-      // 2. Chạy một lượt cuộn mượt sau khi các phần tử hoàn tất render sơ bộ (100ms)
+      // Đợi 50ms để layout ổn định rồi thực hiện cuộn DUY NHẤT một lần cực kỳ mượt mà
+      // Tránh cuộn nhiều lần gây giật lag hoặc tranh chấp khi người dùng kéo (vuốt) màn hình
       setTimeout(() => {
-        const cTop = messagesEl.getBoundingClientRect().top;
-        const mTop = msgDiv.getBoundingClientRect().top;
-        const offset = mTop - cTop + messagesEl.scrollTop;
+        const targetScrollTop = getRelativeOffsetTop(msgDiv, messagesEl) - 8;
         messagesEl.scrollTo({
-          top: offset - 8,
+          top: targetScrollTop,
           behavior: behavior
         });
-      }, 100);
-
-      // 3. Dự phòng 320ms để cuộn lại chính xác hoàn toàn sau khi CSS keyframes animation (msgSlideIn 0.3s) hoàn tất chạy xong
-      setTimeout(() => {
-        const cTop = messagesEl.getBoundingClientRect().top;
-        const mTop = msgDiv.getBoundingClientRect().top;
-        const offset = mTop - cTop + messagesEl.scrollTop;
-        messagesEl.scrollTo({
-          top: offset - 8,
-          behavior: behavior
-        });
-      }, 320);
+      }, 50);
     }
   }
 
