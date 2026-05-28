@@ -551,13 +551,6 @@ ${productContext}`;
     setKeyStatus(keyInfo.id, 'active');
     keyInfo.totalCalls++;
 
-    const statusTextEl = document.getElementById('chatboxStatusText');
-    if (statusTextEl) {
-      statusTextEl.textContent = `🔑 Key ${keyInfo.id} đang trả lời...`;
-      statusTextEl.style.color = '#fff6f7';
-      statusTextEl.style.fontWeight = '700';
-    }
-
     try {
       const systemPrompt = buildSystemPrompt();
       const historySlice = chatHistory.slice(-MAX_HISTORY);
@@ -645,13 +638,6 @@ ${productContext}`;
 
       // Đánh dấu key thành công
       setKeyStatus(keyInfo.id, 'success');
-
-      // Khôi phục trạng thái header
-      if (statusTextEl) {
-        statusTextEl.textContent = 'Luôn sẵn sàng hỗ trợ bạn';
-        statusTextEl.style.color = '';
-        statusTextEl.style.fontWeight = '';
-      }
 
       // Lưu lịch sử chat
       chatHistory.push({ role: 'assistant', content: aiText });
