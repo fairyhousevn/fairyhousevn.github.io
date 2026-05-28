@@ -218,7 +218,6 @@
 .chatbox-msg {
   display: flex;
   gap: 8px;
-  max-width: 88%;
   animation: msgSlideIn 0.3s ease-out;
 }
 @keyframes msgSlideIn {
@@ -229,6 +228,7 @@
 /* AI message (left) */
 .chatbox-msg.ai {
   align-self: flex-start;
+  max-width: 100%; /* Tràn rộng tối đa trong khung chat */
 }
 .chatbox-msg.ai .msg-avatar {
   width: 30px;
@@ -255,6 +255,7 @@
 .chatbox-msg.user {
   align-self: flex-end;
   flex-direction: row-reverse;
+  max-width: 88%; /* Giữ lề trái một chút cho tin nhắn user */
 }
 .chatbox-msg.user .msg-bubble {
   background: linear-gradient(135deg, #fff4f6, #ffe3e8);
