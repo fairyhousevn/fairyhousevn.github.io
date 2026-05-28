@@ -54,7 +54,7 @@ ${productContext}`;
 
   // ===== STATE =====
   let chatHistory = []; // {role: 'user'|'model', parts: [{text: ''}]}
-  let isOpen = false;
+  let isOpen = window.innerWidth > 768; // Mặc định mở trên Desktop (màn hình > 768px), đóng trên Mobile
   let isWaiting = false;
   let lastSentTime = 0;
 
@@ -72,7 +72,7 @@ ${productContext}`;
     container.id = 'fairyChatbox';
     container.innerHTML = `
       <!-- Toggle Button -->
-      <button class="chatbox-toggle" id="chatboxToggle" title="Chat với Fairy">
+      <button class="chatbox-toggle ${isOpen ? 'active' : ''}" id="chatboxToggle" title="Chat với Fairy">
         <span class="toggle-icon">
           <img src="kitty1.png" alt="Kitty" class="chatbox-toggle-avatar">
         </span>
@@ -81,7 +81,7 @@ ${productContext}`;
       </button>
 
       <!-- Chat Window -->
-      <div class="chatbox-window" id="chatboxWindow">
+      <div class="chatbox-window ${isOpen ? 'open' : ''}" id="chatboxWindow">
         <!-- Header -->
         <div class="chatbox-header">
           <img src="logo.jpg" alt="Fairy House" class="chatbox-header-avatar"
@@ -153,6 +153,12 @@ ${productContext}`;
 
     // Load chat history from sessionStorage
     loadChatHistory();
+
+    // Nếu mặc định mở chatbox, thêm class dịch chuyển layout cho body
+    if (isOpen) {
+      document.body.classList.add('chatbox-is-open');
+      scrollToBottom();
+    }
   }
 
   // ===== TOGGLE CHATBOX =====
