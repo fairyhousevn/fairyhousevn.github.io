@@ -476,7 +476,7 @@ ${productContext}`;
   }
 
   // ===== GỌI 9ROUTER API =====
-  async function callGemini(userMessage, retries = 1) {
+  async function callGemini(userMessage, retries = 2) {
     try {
       const systemPrompt = buildSystemPrompt();
       const historySlice = chatHistory.slice(-MAX_HISTORY);
@@ -496,22 +496,34 @@ ${productContext}`;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
-      const response = await fetch(NINE_ROUTER_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${NINE_ROUTER_KEY}`
-        },
-        body: JSON.stringify(requestBody),
-        signal: controller.signal
-      });
+      let response;
+      try {
+        response = await fetch(NINE_ROUTER_API_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${NINE_ROUTER_KEY}`
+          },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal
+        });
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        // Hỗ trợ tự động thử lại nếu gặp lỗi mạng thô (DNS, CORS, rớt mạng, hoặc Tunnel ngủ chưa thức giấc)
+        if (retries > 0) {
+          console.warn(`Mất kết nối hoặc Tunnel đang ngủ (${fetchError.message || fetchError}). Đang thử lại sau 3 giây... (Còn ${retries} lượt thử)`);
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          return callGemini(userMessage, retries - 1);
+        }
+        throw fetchError;
+      }
 
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        // Hỗ trợ tự động thử lại nếu gặp lỗi từ 9Router
+        // Hỗ trợ tự động thử lại nếu gặp lỗi từ 9Router (429 hoặc lỗi server >= 500)
         if ((response.status === 429 || response.status >= 500) && retries > 0) {
-          console.warn(`9Router returned ${response.status}. Retrying in 3s...`);
+          console.warn(`9Router phản hồi mã lỗi ${response.status}. Đang thử lại sau 3 giây... (Còn ${retries} lượt thử)`);
           await new Promise(resolve => setTimeout(resolve, 3000));
           return callGemini(userMessage, retries - 1);
         }
@@ -552,7 +564,7 @@ ${productContext}`;
       addMessage('ai', aiText, mentionedProducts);
 
     } catch (error) {
-      console.error('9Router API Error:', error);
+      console.error('9Router API Error sau các lượt thử lại:', error);
       hideTyping();
 
       let errorMsg = 'Fairy đang offline bạn chờ chút rồi thử lại nhé! 💕 Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ nhanh!';
