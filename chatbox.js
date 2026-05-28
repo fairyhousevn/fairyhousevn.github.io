@@ -346,7 +346,11 @@ ${productContext}`;
     }
 
     messagesEl.appendChild(msgDiv);
-    scrollToBottom();
+    if (type === 'ai' || type === 'error') {
+      scrollToMessage(msgDiv);
+    } else {
+      scrollToBottom();
+    }
     saveChatHistory();
   }
 
@@ -549,6 +553,22 @@ ${productContext}`;
       setTimeout(() => {
         messagesEl.scrollTop = messagesEl.scrollHeight;
       }, 50);
+    }
+  }
+
+  // ===== SCROLL TO MESSAGE =====
+  function scrollToMessage(msgDiv) {
+    const messagesEl = document.getElementById('chatboxMessages');
+    if (messagesEl && msgDiv) {
+      setTimeout(() => {
+        const containerTop = messagesEl.getBoundingClientRect().top;
+        const msgTop = msgDiv.getBoundingClientRect().top;
+        const scrollOffset = msgTop - containerTop + messagesEl.scrollTop;
+        messagesEl.scrollTo({
+          top: scrollOffset - 8,
+          behavior: 'smooth'
+        });
+      }, 100);
     }
   }
 
