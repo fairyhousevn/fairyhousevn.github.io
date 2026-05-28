@@ -242,10 +242,6 @@ ${productContext}`;
     // Clear input
     input.value = '';
 
-    // Hide quick replies after first message
-    const quickReplies = document.getElementById('chatboxQuickReplies');
-    if (quickReplies) quickReplies.style.display = 'none';
-
     // Add user message
     addMessage('user', text);
 
@@ -538,12 +534,6 @@ ${productContext}`;
           return item;
         });
         
-        // Hide quick replies if there are messages
-        if (chatHistory.length > 0) {
-          const quickReplies = document.getElementById('chatboxQuickReplies');
-          if (quickReplies) quickReplies.style.display = 'none';
-        }
-
 
       }
     } catch (e) { /* ignore */ }
