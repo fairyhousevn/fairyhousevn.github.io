@@ -1,44 +1,45 @@
 // =========================================================
-// 🧚 FAIRY HOUSE AI CHATBOX - Gemini API Integration
+// 🧚 FAIRY HOUSE AI CHATBOX - 9Router Integration
 // =========================================================
 
 (function() {
   'use strict';
 
-  // ===== CẤU HÌNH API PROXY (KEY ĐƯỢC GIẤU AN TOÀN TRÊN SERVER) =====
-  // API keys không còn nằm ở đây nữa! Chúng được lưu trong Vercel Environment Variables.
-  // Frontend chỉ gọi đến /api/chat, server sẽ tự xử lý key và gọi Gemini API.
-  const API_PROXY_ENDPOINT = '/api/chat';
-  const TOTAL_KEYS = 4; // Số lượng key trên server (dùng để hiển thị chấm tròn giám sát)
-  
+  // ===== CẤU HÌNH API =====
   const MAX_HISTORY = 6; // Giới hạn context lịch sử chat
   const RATE_LIMIT_MS = 2000; // Khôi phục rate limit 2 giây
   const API_TIMEOUT_MS = 30000; // Timeout 30 giây
 
-  // Trạng thái hoạt động của từng key (chỉ dùng để hiển thị giao diện, key thật nằm trên server)
-  const keyStatus = Array.from({ length: TOTAL_KEYS }, (_, i) => ({
-    id: i + 1,
-    label: `Key ${i + 1}`,
-    totalCalls: 0,
-    errors: 0,
-    status: 'success' // Ban đầu cả 4 key đều xanh lá (sẵn sàng)
-  }));
+  // Biến lưu cấu hình chạy (sẽ được lấy và giải mã ở runtime)
+  let _rk = ''; // Decoded API Key
+  let _ru = ''; // Decoded API URL
+  let _rm = ''; // Decoded Model name
 
-  // Cập nhật giao diện của 4 chấm tròn giám sát key
-  function updateKeyMonitorUI() {
-    keyStatus.forEach(k => {
-      const dots = document.querySelectorAll(`.key-dot[data-key-id="${k.id}"]`);
-      dots.forEach(dot => {
-        dot.className = `key-dot ${k.status}`;
-      });
-    });
+  // Hàm giải mã: Đảo chuỗi -> Giải mã Base64
+  function decodeValue(encoded) {
+    if (!encoded) return '';
+    try {
+      const reversed = encoded.split('').reverse().join('');
+      return atob(reversed);
+    } catch (e) {
+      console.error('[Security] Lỗi giải mã cấu hình:', e);
+      return '';
+    }
   }
 
-  function setKeyStatus(keyId, status) {
-    const key = keyStatus.find(k => k.id === keyId);
-    if (key) {
-      key.status = status;
-      updateKeyMonitorUI();
+  // Tải cấu hình bảo mật từ Vercel Key Dispenser
+  async function fetchConfig() {
+    if (_rk && _ru) return;
+    try {
+      const response = await fetch('/api/get-config');
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      _rk = decodeValue(data.ek);
+      _ru = decodeValue(data.eu);
+      _rm = decodeValue(data.em) || 'chatboxweb';
+    } catch (err) {
+      console.error('[Config] Không thể lấy thông tin cấu hình bảo mật:', err);
+      throw err;
     }
   }
 
@@ -97,7 +98,6 @@ ${productContext}`;
   let isOpen = window.innerWidth > 768; // Mặc định mở trên Desktop (màn hình > 768px), đóng trên Mobile
   let isWaiting = false;
   let lastSentTime = 0;
-  let nextKeyIndex = 1; // Chỉ định key ưa thích tiếp theo để gọi xoay vòng (Sequential Round-Robin)
 
   // ===== KHỞI TẠO HTML =====
   function initChatboxHTML() {
@@ -133,13 +133,6 @@ ${productContext}`;
               <span class="chatbox-status-dot"></span>
               <span id="chatboxStatusText">Luôn sẵn sàng hỗ trợ bạn</span>
             </div>
-          </div>
-          <!-- Giao diện giám sát 4 key dạng chấm tròn chuyên nghiệp -->
-          <div class="key-monitor" id="keyMonitor">
-            <span class="key-dot success" data-key-id="1"></span>
-            <span class="key-dot success" data-key-id="2"></span>
-            <span class="key-dot success" data-key-id="3"></span>
-            <span class="key-dot success" data-key-id="4"></span>
           </div>
           <button class="chatbox-header-close" id="chatboxClose" title="Đóng">✕</button>
         </div>
@@ -228,9 +221,6 @@ ${productContext}`;
 
     // Load chat history from sessionStorage
     loadChatHistory();
-
-    // Khởi tạo trạng thái chấm tròn giám sát key
-    updateKeyMonitorUI();
 
     // Nếu mặc định mở chatbox, thêm class dịch chuyển layout cho body
     if (isOpen) {
@@ -514,145 +504,101 @@ ${productContext}`;
     document.getElementById('chatboxSendBtn').disabled = false;
   }
 
-  // ===== GỌI API PROXY (SERVERLESS FUNCTION) =====
+  // ===== GỌI API 9ROUTER TRỰC TIẾP =====
   async function callGemini(userMessage) {
-    // Đánh dấu key chuẩn bị gọi ở trạng thái active (chớp vàng)
-    setKeyStatus(nextKeyIndex, 'active');
+    let retries = 2;
+    let delay = 1000;
 
+    // 1. Tải cấu hình bảo mật nếu chưa có
     try {
-      const systemPrompt = buildSystemPrompt();
-      const historySlice = chatHistory.slice(-MAX_HISTORY);
+      await fetchConfig();
+    } catch (configError) {
+      console.error('Lỗi khi tải cấu hình:', configError);
+      hideTyping();
+      const errorMsg = 'Không thể kết nối máy chủ để lấy cấu hình bảo mật. Vui lòng tải lại trang hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được trợ giúp! 💕';
+      addMessage('error', errorMsg);
+      return;
+    }
 
-      // Cấu trúc message cho Gemini API
-      let contents = [];
-      let lastRole = null;
-      for (const item of historySlice) {
-        const role = item.role === 'assistant' || item.role === 'model' ? 'model' : 'user';
-        // Gộp tin nhắn nếu trùng vai trò liên tiếp
-        if (role === lastRole) {
-          if (contents.length > 0) {
-            contents[contents.length - 1].parts[0].text += '\n' + item.content;
-          }
-        } else {
-          contents.push({
-            role: role,
-            parts: [{ text: item.content }]
-          });
-          lastRole = role;
-        }
-      }
+    const systemPrompt = buildSystemPrompt();
+    const messages = [
+      { role: 'system', content: systemPrompt }
+    ];
 
-      // Đảm bảo tin nhắn đầu tiên phải là của 'user'
-      while (contents.length > 0 && contents[0].role !== 'user') {
-        contents.shift();
-      }
+    const historySlice = chatHistory.slice(-MAX_HISTORY);
+    historySlice.forEach(item => {
+      messages.push({
+        role: item.role === 'assistant' ? 'assistant' : 'user',
+        content: item.content
+      });
+    });
 
-      // Nếu lịch sử rỗng (ví dụ sau khi shift), thêm tin nhắn hiện tại của user vào
-      if (contents.length === 0) {
-        contents.push({
-          role: 'user',
-          parts: [{ text: userMessage }]
-        });
-      }
+    const requestBody = {
+      model: _rm || 'chatboxweb',
+      messages: messages,
+      max_tokens: 2000,
+      stream: false
+    };
 
-      const requestBody = {
-        contents: contents,
-        systemInstruction: {
-          parts: [{ text: systemPrompt }]
-        },
-        generationConfig: {
-          maxOutputTokens: 2000,
-          temperature: 0.7
-        },
-        preferredKeyIndex: nextKeyIndex // Gửi key ưa thích lên server để thử trước
-      };
-
-      // Gọi đến API Proxy trên Vercel (key được giấu an toàn trên server)
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
-
-      let response;
+    while (retries >= 0) {
       try {
-        response = await fetch(API_PROXY_ENDPOINT, {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
+
+        const response = await fetch(_ru, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${_rk}`
           },
           body: JSON.stringify(requestBody),
           signal: controller.signal
         });
-      } catch (fetchError) {
+
         clearTimeout(timeoutId);
-        throw fetchError;
-      }
 
-      clearTimeout(timeoutId);
-
-      const data = await response.json();
-
-      // Cập nhật trạng thái của các key được thử trong lượt này dựa trên phản hồi từ server
-      const attemptedKeys = data._keyStatuses ? Object.keys(data._keyStatuses).map(Number) : [];
-      
-      keyStatus.forEach(k => {
-        if (attemptedKeys.includes(k.id)) {
-          // Nếu key được thử trong lượt này, cập nhật trạng thái từ server trả về
-          const status = data._keyStatuses[k.id];
-          setKeyStatus(k.id, status);
-          if (status === 'success') {
-            k.totalCalls++;
-          }
+        if (!response.ok) {
+          const status = response.status;
+          const text = await response.text();
+          throw new Error(`HTTP ${status}: ${text}`);
         }
-        // Các key không được thử trong lượt này sẽ giữ nguyên trạng thái cũ (không reset về idle)
-      });
 
-      // Xoay vòng key cho tin nhắn tiếp theo
-      nextKeyIndex = (nextKeyIndex % TOTAL_KEYS) + 1;
+        const data = await response.json();
+        let aiText = '';
+        if (data.choices && data.choices[0] && data.choices[0].message) {
+          aiText = data.choices[0].message.content;
+        }
 
-      // Xử lý trường hợp tất cả key đều quá tải
-      if (!response.ok) {
-        if (data.error === 'ALL_KEYS_EXHAUSTED' || response.status === 429) {
+        if (!aiText) {
+          throw new Error('Phản hồi rỗng từ 9Router API');
+        }
+
+        // Lưu lịch sử chat
+        chatHistory.push({ role: 'assistant', content: aiText });
+
+        // Tìm sản phẩm được nhắc tới
+        const mentionedProducts = findMentionedProducts(aiText);
+
+        // Ẩn typing và hiển thị tin nhắn
+        hideTyping();
+        addMessage('ai', aiText, mentionedProducts);
+        return; // Thành công, thoát khỏi vòng lặp retry
+
+      } catch (error) {
+        console.warn(`Lỗi gọi API 9Router (còn ${retries} lượt thử lại):`, error);
+        
+        if (retries > 0) {
+          retries--;
+          await new Promise(resolve => setTimeout(resolve, delay));
+          delay *= 2; // Exponential backoff
+        } else {
+          // Hết lượt thử lại, báo lỗi cho người dùng
           hideTyping();
-          const statusTextEl = document.getElementById('chatboxStatusText');
-          if (statusTextEl) {
-            statusTextEl.textContent = 'Fairy tạm thời bận';
-            statusTextEl.style.color = '#ef4444';
-          }
-
-          const errorMsg = 'Fairy hiện tại đang có quá nhiều khách hàng nhắn tin cùng lúc nên các API key đều bị quá tải (Rate Limit). Bạn chờ khoảng 1 phút rồi thử nhắn lại nhé! 💕 Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để Fairy trả lời trực tiếp ngay nha!';
+          const errorMsg = 'Fairy gặp chút trục trặc kết nối rồi 😢 Bạn thử nhắn lại sau chút nhé! Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ ngay nha! 💕';
           addMessage('error', errorMsg);
-          return;
+          break;
         }
-        throw new Error(`HTTP ${response.status}: ${data.error || 'Unknown error'}`);
       }
-
-      let aiText = '';
-      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
-        aiText = data.candidates[0].content.parts[0].text;
-      }
-
-      if (!aiText) {
-        throw new Error('Phản hồi rỗng từ Gemini API');
-      }
-
-      // Lưu lịch sử chat
-      chatHistory.push({ role: 'assistant', content: aiText });
-
-      // Tìm sản phẩm được nhắc tới
-      const mentionedProducts = findMentionedProducts(aiText);
-
-      // Ẩn typing và hiển thị tin nhắn
-      hideTyping();
-      addMessage('ai', aiText, mentionedProducts);
-
-    } catch (error) {
-      console.error('[Gemini API Proxy] Lỗi:', error);
-      
-      // Nếu lỗi kết nối chung hoặc lỗi server, hiển thị tất cả các key đang có trạng thái error
-      keyStatus.forEach(k => setKeyStatus(k.id, 'error'));
-
-      hideTyping();
-      const errorMsg = 'Fairy gặp chút trục trặc kỹ thuật rồi 😢 Bạn thử nhắn lại sau chút nhé! Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ ngay nha! 💕';
-      addMessage('error', errorMsg);
     }
   }
 

@@ -195,49 +195,7 @@
 }
 
 
-/* ===== KEY MONITOR SYSTEM ===== */
-.key-monitor {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  background: rgba(0, 0, 0, 0.12);
-  padding: 4px 6px;
-  border-radius: 12px;
-  margin-left: auto;
-  margin-right: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  flex-shrink: 0;
-}
-.key-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  cursor: help;
-}
-.key-dot.idle {
-  background-color: rgba(255, 255, 255, 0.4);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
-}
-.key-dot.active {
-  background-color: #f59e0b; /* Vàng hổ phách */
-  box-shadow: 0 0 8px #f59e0b;
-  animation: keyActivePulse 0.8s infinite alternate;
-}
-.key-dot.success {
-  background-color: #10b981; /* Xanh lá */
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.7);
-}
-.key-dot.error {
-  background-color: #ef4444; /* Đỏ */
-  box-shadow: 0 0 6px rgba(239, 68, 68, 0.7);
-}
 
-@keyframes keyActivePulse {
-  0% { transform: scale(0.9); opacity: 0.7; }
-  100% { transform: scale(1.2); opacity: 1; }
-}
 
 /* ===== CHATBOX MESSAGES AREA ===== */
 .chatbox-messages {
