@@ -601,7 +601,11 @@ ${productContext}`;
       console.error('9Router API Error sau các lượt thử lại:', error);
       hideTyping();
 
-      let errorMsg = 'Fairy đang offline bạn chờ chút rồi thử lại nhé! 💕 Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ nhanh!';
+      // DEBUG: Hiển thị chi tiết lỗi để xác định nguyên nhân chính xác
+      const debugInfo = `[DEBUG] Lỗi: ${error.name || 'Unknown'} | ${error.message || 'No message'} | URL: ${NINE_ROUTER_API_URL}`;
+      console.error(debugInfo);
+
+      let errorMsg = 'Fairy đang offline bạn chờ chút rồi thử lại nhé! 💕 Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ nhanh!<br><br><small style="color:#999;font-size:11px;">' + debugInfo + '</small>';
 
       addMessage('error', errorMsg);
     }
