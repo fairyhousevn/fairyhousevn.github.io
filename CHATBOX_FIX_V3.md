@@ -68,4 +68,27 @@ let retries = 1;
 while (retries >= 0) { ... }
 
 // MỚI: Gửi liên tục 50 lần, mỗi lần cách 3 giây
-const MAX_ATTEMP
+const MAX_ATTEMPTS = 50; // 150 giây / 3 giây = 50 lần
+const RETRY_INTERVAL = 3000; // 3 giây
+while (requestCount < MAX_ATTEMPTS) { ... }
+```
+
+## 🔍 Vấn Đề Tunnel Unreachable
+
+Từ console log của 9Router:
+```
+[Tunnel] safeRestart (watchdog) — tunnel unreachable
+[Tunnel] cloudflared exit code=4294967295 signal=null
+[Tunnel] cloudflared exited unexpectedly, scheduling respawn
+```
+
+**Giải thích:**
+- Cloudflare Tunnel bị crash và cần restart
+- Thời gian restart: ~120 giây
+- Logic gửi liên tục giúp "wake up" tunnel khi restart xong
+
+---
+
+**Ngày cập nhật:** 2026-05-29  
+**Phiên bản:** V3.1 (150 giây)  
+**Trạng thái:** ✅ Hoàn thành
