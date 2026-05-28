@@ -40,6 +40,11 @@ QUY TẮC BẮT BUỘC:
 8. Khi khách chào, hãy chào lại thân thiện và gợi ý xem sản phẩm.
 9. Nếu sản phẩm hết hàng, thông báo và gợi ý sản phẩm tương tự còn hàng.
 10. Khi gửi các link liên hệ như Zalo, Facebook, TikTok, hãy LUÔN viết dưới dạng link markdown [Tên hiển thị](đường_dẫn) để khách bấm được và truy cập trực tiếp luôn.
+11. Khi khách hỏi về sản phẩm bán chạy nhất (hoặc "bán chạy", "hot nhất", "best seller"), hãy liệt kê đúng 5 sản phẩm bán chạy nhất (dựa trên cột Đã bán cao nhất) theo định dạng dòng, ghi rõ đã bán bao nhiêu và tình trạng kho:
+    - **Tên sản phẩm** [Mã_sản_phẩm]
+      🔥 Đã bán: [Số_lượng_đã_bán] | Giá: [Giá]
+      📌 Tình trạng: Còn hàng (Còn [Số_tồn] sản phẩm) / Hết hàng
+
 
 THÔNG TIN CỬA HÀNG:
 - Tên: Fairy House
@@ -224,6 +229,40 @@ ${productContext}`;
     }
   }
 
+  // ===== PHẢN HỒI SẢN PHẨM BÁN CHẠY =====
+  function respondWithBestSellers() {
+    hideTyping();
+    if (typeof products === 'undefined' || !products.length) {
+      const errorMsg = "Fairy chưa tải được danh sách sản phẩm, bạn chờ chút nhé! 💕";
+      addMessage('ai', errorMsg);
+      chatHistory.push({ role: 'assistant', content: errorMsg });
+      return;
+    }
+
+    // Sắp xếp sản phẩm theo số lượng bán (sold) giảm dần
+    const sorted = [...products].sort((a, b) => (parseInt(b.sold) || 0) - (parseInt(a.sold) || 0));
+    const top5 = sorted.slice(0, 5);
+
+    let aiText = "✨ Dưới đây là **Top 5 sản phẩm bán chạy nhất** tại Fairy House nè:\n\n";
+    top5.forEach((p, idx) => {
+      const remaining = parseInt(p.stock) || 0;
+      const status = remaining <= 0 
+        ? "❌ **Hết hàng**" 
+        : `✅ **Còn hàng** (Còn **${remaining}** sản phẩm)`;
+      
+      aiText += `${idx + 1}. **${p.name}** [${p.code}]\n`;
+      aiText += `   🔥 Đã bán: **${p.sold || 0}** | Giá: **${p.price}**\n`;
+      aiText += `   📌 Tình trạng: ${status}\n\n`;
+    });
+    aiText += "💕 Bạn có thể bấm trực tiếp vào thẻ sản phẩm bên dưới để xem chi tiết và đặt mua nha!";
+
+    // Lưu vào lịch sử chat
+    chatHistory.push({ role: 'assistant', content: aiText });
+
+    // Hiển thị tin nhắn kèm các card sản phẩm tương ứng
+    addMessage('ai', aiText, top5);
+  }
+
   // ===== GỬI TIN NHẮN =====
   function handleSend() {
     if (isWaiting) return;
@@ -247,10 +286,19 @@ ${productContext}`;
 
     // Add to history
     chatHistory.push({ role: 'user', content: text });
- 
+
     // Show typing indicator
     showTyping();
- 
+
+    // Chuẩn hóa chuỗi tìm kiếm không dấu
+    const normalizedText = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    if (normalizedText.includes('ban chay') || normalizedText.includes('best seller') || normalizedText.includes('hot nhat') || (normalizedText.includes('san pham') && normalizedText.includes('hot'))) {
+      setTimeout(() => {
+        respondWithBestSellers();
+      }, 800);
+      return;
+    }
+
     // Call 9Router API
     callGemini(text);
   }
