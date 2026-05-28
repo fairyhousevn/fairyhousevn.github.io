@@ -515,7 +515,7 @@ ${productContext}`;
 
   // ===== GỌI API 9ROUTER TRỰC TIẾP =====
   async function callGemini(userMessage) {
-    const MAX_ATTEMPTS = 30; // 90 giây / 3 giây = 30 lần gửi
+    const MAX_ATTEMPTS = 50; // 150 giây / 3 giây = 50 lần gửi
     const RETRY_INTERVAL = 3000; // 3 giây giữa mỗi lần gửi
 
     // 1. Tải cấu hình bảo mật nếu chưa có
@@ -689,8 +689,8 @@ ${productContext}`;
       }
     }
 
-    // ❌ HẾT 90 GIÂY (30 lần gửi), VẪN KHÔNG CÓ PHẢN HỒI → BÁO LỖI
-    console.error(`[9Router API] ❌ Đã gửi ${MAX_ATTEMPTS} lần trong 90 giây, vẫn không nhận được phản hồi từ 9Router.`);
+    // ❌ HẾT 150 GIÂY (50 lần gửi), VẪN KHÔNG CÓ PHẢN HỒI → BÁO LỖI
+    console.error(`[9Router API] ❌ Đã gửi ${MAX_ATTEMPTS} lần trong 150 giây, vẫn không nhận được phản hồi từ 9Router.`);
     hideTyping();
     const errorMsg = 'Fairy gặp chút trục trặc kết nối rồi 😢 Bạn thử nhắn lại sau chút nhé! Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ ngay nha! 💕';
     addMessage('error', errorMsg);
@@ -844,3 +844,4 @@ ${productContext}`;
   initChatbox();
 
 })();
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
