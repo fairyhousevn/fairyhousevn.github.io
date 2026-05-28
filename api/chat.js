@@ -72,6 +72,7 @@ export default async function handler(req, res) {
 
   // Trạng thái của các key được thử trong lượt này để trả về cho frontend hiển thị
   const keyStatuses = {};
+  const keyErrors = {};
   let lastError = null;
 
   for (let i = 0; i < GEMINI_KEYS.length; i++) {
@@ -110,11 +111,13 @@ export default async function handler(req, res) {
       keyStatuses[keyId] = 'error';
       const errText = await response.text();
       lastError = `Key ${keyId}: HTTP ${response.status} - ${errText}`;
+      keyErrors[keyId] = lastError;
       console.warn(lastError);
 
     } catch (error) {
       keyStatuses[keyId] = 'error';
       lastError = `Key ${keyId}: ${error.message}`;
+      keyErrors[keyId] = lastError;
       console.error(lastError);
     }
   }
@@ -123,6 +126,7 @@ export default async function handler(req, res) {
   return res.status(429).json({
     error: 'ALL_KEYS_EXHAUSTED',
     message: 'Tất cả API keys đều đang quá tải. Vui lòng thử lại sau 1 phút.',
-    _keyStatuses: keyStatuses
+    _keyStatuses: keyStatuses,
+    _keyErrors: keyErrors
   });
 }
