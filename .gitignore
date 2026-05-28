@@ -4,3 +4,7 @@ Thumbs.db
 *.log
 
 .vercel
+test_keys.js
+.env
+.env.local
+.env*.local

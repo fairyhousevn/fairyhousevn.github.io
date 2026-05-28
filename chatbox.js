@@ -5,37 +5,24 @@
 (function() {
   'use strict';
 
-  // ===== CẤU HÌNH GEMINI API TRỰC TIẾP =====
-  const GEMINI_KEYS = [
-    "AIzaSyAen3XHVLyTUlLxdKIHp8LDK8004YU3kQI",
-    "AIzaSyCrelZBi1xfPdlgHZujKfZ_kDOMKnAsDNo",
-    "AIzaSyD_Dew5x076_DPV6iehhIiuQd5ngTNh0lQ",
-    "AIzaSyA_AHJhvE5pjLIdvKo_YliUasdIWP5B58E"
-  ];
-  const GEMINI_MODEL = "gemini-2.5-flash";
+  // ===== CẤU HÌNH API PROXY (KEY ĐƯỢC GIẤU AN TOÀN TRÊN SERVER) =====
+  // API keys không còn nằm ở đây nữa! Chúng được lưu trong Vercel Environment Variables.
+  // Frontend chỉ gọi đến /api/chat, server sẽ tự xử lý key và gọi Gemini API.
+  const API_PROXY_ENDPOINT = '/api/chat';
+  const TOTAL_KEYS = 4; // Số lượng key trên server (dùng để hiển thị chấm tròn giám sát)
   
   const MAX_HISTORY = 6; // Giới hạn context lịch sử chat
   const RATE_LIMIT_MS = 2000; // Khôi phục rate limit 2 giây
   const API_TIMEOUT_MS = 30000; // Timeout 30 giây
 
-  let currentKeyIndex = 0; // Chỉ số key hiện tại xoay vòng (round robin)
-
-  // Trạng thái hoạt động của từng key
-  const keyStatus = GEMINI_KEYS.map((key, i) => ({
+  // Trạng thái hoạt động của từng key (chỉ dùng để hiển thị giao diện, key thật nằm trên server)
+  const keyStatus = Array.from({ length: TOTAL_KEYS }, (_, i) => ({
     id: i + 1,
     label: `Key ${i + 1}`,
-    key: key,
     totalCalls: 0,
     errors: 0,
     status: 'idle' // 'idle' | 'active' | 'success' | 'error'
   }));
-
-  // Lấy key tiếp theo theo vòng tròn
-  function getNextKey() {
-    const keyInfo = keyStatus[currentKeyIndex];
-    currentKeyIndex = (currentKeyIndex + 1) % GEMINI_KEYS.length;
-    return keyInfo;
-  }
 
   // Cập nhật giao diện của 4 chấm tròn giám sát key
   function updateKeyMonitorUI() {
@@ -526,29 +513,10 @@ ${productContext}`;
     document.getElementById('chatboxSendBtn').disabled = false;
   }
 
-  // ===== GỌI 9ROUTER API =====
-  async function callGemini(userMessage, attempt = 1) {
-    // Nếu đã thử quá số lượng key có sẵn, dừng lại báo lỗi
-    if (attempt > GEMINI_KEYS.length) {
-      hideTyping();
-      
-      const statusTextEl = document.getElementById('chatboxStatusText');
-      if (statusTextEl) {
-        statusTextEl.textContent = 'Fairy tạm thời bận';
-        statusTextEl.style.color = '#ef4444';
-      }
-
-      const errorMsg = 'Fairy hiện tại đang có quá nhiều khách hàng nhắn tin cùng lúc nên các API key đều bị quá tải (Rate Limit). Bạn chờ khoảng 1 phút rồi thử nhắn lại nhé! 💕 Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để Fairy trả lời trực tiếp ngay nha!';
-      addMessage('error', errorMsg);
-      return;
-    }
-
-    const keyInfo = getNextKey();
-    const apiKey = keyInfo.key;
-    
-    // Thiết lập trạng thái key đang hoạt động
-    setKeyStatus(keyInfo.id, 'active');
-    keyInfo.totalCalls++;
+  // ===== GỌI API PROXY (SERVERLESS FUNCTION) =====
+  async function callGemini(userMessage) {
+    // Đánh dấu tất cả key đang hoạt động
+    keyStatus.forEach(k => setKeyStatus(k.id, 'active'));
 
     try {
       const systemPrompt = buildSystemPrompt();
@@ -597,14 +565,13 @@ ${productContext}`;
         }
       };
 
-      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-
+      // Gọi đến API Proxy trên Vercel (key được giấu an toàn trên server)
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
       let response;
       try {
-        response = await fetch(endpoint, {
+        response = await fetch(API_PROXY_ENDPOINT, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -619,13 +586,38 @@ ${productContext}`;
 
       clearTimeout(timeoutId);
 
+      const data = await response.json();
+
+      // Xử lý trường hợp tất cả key đều quá tải
       if (!response.ok) {
-        const errText = await response.text();
-        throw new Error(`HTTP ${response.status}: ${errText || response.statusText}`);
+        if (data.error === 'ALL_KEYS_EXHAUSTED' || response.status === 429) {
+          hideTyping();
+          const statusTextEl = document.getElementById('chatboxStatusText');
+          if (statusTextEl) {
+            statusTextEl.textContent = 'Fairy tạm thời bận';
+            statusTextEl.style.color = '#ef4444';
+          }
+          // Đánh dấu tất cả key lỗi
+          keyStatus.forEach(k => setKeyStatus(k.id, 'error'));
+
+          const errorMsg = 'Fairy hiện tại đang có quá nhiều khách hàng nhắn tin cùng lúc nên các API key đều bị quá tải (Rate Limit). Bạn chờ khoảng 1 phút rồi thử nhắn lại nhé! 💕 Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để Fairy trả lời trực tiếp ngay nha!';
+          addMessage('error', errorMsg);
+          return;
+        }
+        throw new Error(`HTTP ${response.status}: ${data.error || 'Unknown error'}`);
       }
 
-      const data = await response.json();
-      
+      // Cập nhật trạng thái chấm tròn giám sát key
+      const usedKeyId = data._keyUsed || 1;
+      keyStatus.forEach(k => {
+        if (k.id === usedKeyId) {
+          setKeyStatus(k.id, 'success');
+          k.totalCalls++;
+        } else {
+          setKeyStatus(k.id, 'idle');
+        }
+      });
+
       let aiText = '';
       if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
         aiText = data.candidates[0].content.parts[0].text;
@@ -634,9 +626,6 @@ ${productContext}`;
       if (!aiText) {
         throw new Error('Phản hồi rỗng từ Gemini API');
       }
-
-      // Đánh dấu key thành công
-      setKeyStatus(keyInfo.id, 'success');
 
       // Lưu lịch sử chat
       chatHistory.push({ role: 'assistant', content: aiText });
@@ -649,17 +638,14 @@ ${productContext}`;
       addMessage('ai', aiText, mentionedProducts);
 
     } catch (error) {
-      console.error(`[Gemini API] Lỗi với Key ${keyInfo.id}:`, error);
+      console.error('[Gemini API Proxy] Lỗi:', error);
       
-      // Đánh dấu key lỗi
-      setKeyStatus(keyInfo.id, 'error');
-      keyInfo.errors++;
+      // Đánh dấu tất cả key lỗi
+      keyStatus.forEach(k => setKeyStatus(k.id, 'error'));
 
-      // Đang thử lại với key tiếp theo
-      console.warn(`Key ${keyInfo.id} thất bại. Đang tự động chuyển sang key tiếp theo... (Lượt thử: ${attempt}/${GEMINI_KEYS.length})`);
-      
-      // Thử lại ngay lập tức với key tiếp theo
-      return callGemini(userMessage, attempt + 1);
+      hideTyping();
+      const errorMsg = 'Fairy gặp chút trục trặc kỹ thuật rồi 😢 Bạn thử nhắn lại sau chút nhé! Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ ngay nha! 💕';
+      addMessage('error', errorMsg);
     }
   }
 
