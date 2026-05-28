@@ -480,11 +480,7 @@ ${productContext}`;
       console.error('9Router API Error:', error);
       hideTyping();
 
-      let errorMsg = 'Fairy đang bận trả lời khách khác, bạn chờ chút rồi thử lại nhé! 💕 Hoặc liên hệ Zalo <strong>0378 791 667</strong> để được hỗ trợ nhanh!';
-      
-      if (error.name === 'AbortError') {
-        errorMsg = 'Fairy mất hơi lâu để suy nghĩ 🤔 Bạn thử hỏi lại nhé!';
-      }
+      let errorMsg = 'Fairy đang offline bạn chờ chút rồi thử lại nhé! 💕 Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ nhanh!';
 
       addMessage('error', errorMsg);
     }
