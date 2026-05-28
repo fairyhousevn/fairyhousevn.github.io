@@ -820,13 +820,16 @@ body {
     max-width: none;
     margin: 0;
     padding: 2px 4px 2px 8px;
-    height: 28px; /* Thu nhỏ chiều cao ô tìm kiếm */
-    border-radius: 14px;
+    height: 30px; /* Tăng nhẹ để chữ 16px hiển thị đẹp */
+    border-radius: 15px;
     border: 1px solid var(--primary-200);
+    display: flex;
+    align-items: center;
   }
   .header-search-input {
-    font-size: 0.72rem;
-    padding: 2px 0;
+    font-size: 16px !important; /* Chống zoom trên iOS */
+    padding: 0;
+    line-height: normal;
   }
   .header-search-btn {
     width: 22px;
@@ -957,8 +960,54 @@ body {
     padding: 0;
   }
   .hero-card { padding: 30px 20px; }
-  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
-  .product-info h3 { font-size: 0.85rem; }
+  .products-grid {
+    grid-template-columns: repeat(5, 1fr) !important;
+    gap: 6px !important;
+  }
+  .product-card {
+    border-radius: 10px !important;
+    box-shadow: 0 1px 4px rgba(247,77,123,0.06) !important;
+  }
+  .product-img {
+    border-radius: 10px 10px 0 0 !important;
+  }
+  .product-info {
+    padding: 6px !important;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: auto;
+  }
+  .product-info h3 {
+    font-size: 0.72rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 2px !important;
+  }
+  .product-info h3 .p-name {
+    display: none !important; /* Ẩn tên sản phẩm để tránh tràn chữ */
+  }
+  .product-info h3 .p-code {
+    font-weight: 700 !important;
+    color: var(--gray-800) !important;
+  }
+  .product-price {
+    margin-bottom: 0 !important;
+    justify-content: center !important;
+  }
+  .price-current {
+    font-size: 0.75rem !important;
+    font-weight: 700 !important;
+  }
+  .price-old {
+    display: none !important; /* Ẩn giá cũ trên mobile */
+  }
+  .product-stats {
+    display: none !important; /* Ẩn thống kê đã bán/kho trên mobile */
+  }
+  .product-actions {
+    display: none !important; /* Ẩn nút Chọn mua thô kệch trên mobile */
+  }
   .footer-inner { grid-template-columns: 1fr; gap: 30px; }
   .section-title h2 {
     font-size: 1.5rem;
@@ -999,8 +1048,6 @@ body {
   }
 }
 @media (max-width: 480px) {
-  .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .product-info { padding: 12px; }
   .cart-sidebar { max-width: 100%; right: -100%; }
   .modal-product-detail { max-width: 100%; margin: 0; border-radius: 0; max-height: 100vh; }
   .dual-btns { flex-direction: column; }

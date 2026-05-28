@@ -214,7 +214,7 @@ function generateProductHTML(p) {
         ${isOutOfStock ? '<div class="out-of-stock-overlay">HẾT HÀNG</div>' : ''}
       </div>
       <div class="product-info">
-        <h3>${p.code} - ${p.name}</h3>
+        <h3><span class="p-code">${p.code}</span><span class="p-name"> - ${p.name}</span></h3>
         <div class="product-price">
           <span class="price-current">${p.price}</span>
           ${p.oldPrice ? `<span class="price-old">${p.oldPrice}</span>` : ''}
