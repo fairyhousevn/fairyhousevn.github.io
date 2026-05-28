@@ -8,7 +8,7 @@
   // ===== CẤU HÌNH API =====
   const MAX_HISTORY = 6; // Giới hạn context lịch sử chat
   const RATE_LIMIT_MS = 2000; // Khôi phục rate limit 2 giây
-  const API_TIMEOUT_MS = 30000; // Timeout 30 giây
+  const API_TIMEOUT_MS = 60000; // Timeout 60 giây
 
   // Biến lưu cấu hình chạy (sẽ được lấy và giải mã ở runtime)
   let _rk = ''; // Decoded API Key
@@ -506,7 +506,7 @@ ${productContext}`;
 
   // ===== GỌI API 9ROUTER TRỰC TIẾP =====
   async function callGemini(userMessage) {
-    let retries = 2;
+    let retries = 1;
     let delay = 1000;
 
     // 1. Tải cấu hình bảo mật nếu chưa có
