@@ -553,33 +553,43 @@ ${productContext}`;
       const attemptNumber = 2 - retries;
       console.log(`[9Router API] Bắt đầu lượt thử ${attemptNumber}/2...`);
       try {
+        // Wrap fetch trong Promise.race() với timeout để đảm bảo timeout luôn hoạt động
+        // ngay cả khi gặp lỗi network ngay lập tức
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => {
-          console.warn(`[9Router API] Lượt thử ${attemptNumber} vượt quá 60 giây! Đang hủy request...`);
-          controller.abort();
-        }, API_TIMEOUT_MS);
 
-        const response = await fetch(_ru, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${_rk}`
-          },
-          body: JSON.stringify(requestBody),
-          signal: controller.signal
+        const fetchPromise = (async () => {
+          const response = await fetch(_ru, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${_rk}`
+            },
+            body: JSON.stringify(requestBody),
+            signal: controller.signal
+          });
+
+          if (!response.ok) {
+            const status = response.status;
+            const text = await response.text();
+            throw new Error(`HTTP ${status}: ${text}`);
+          }
+
+          return response;
+        })();
+
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => {
+            console.warn(`[9Router API] Lượt thử ${attemptNumber} vượt quá 60 giây! Đang hủy request...`);
+            controller.abort();
+            reject(new Error('Request timeout after 60 seconds'));
+          }, API_TIMEOUT_MS);
         });
 
-        clearTimeout(timeoutId);
-
-        if (!response.ok) {
-          const status = response.status;
-          const text = await response.text();
-          throw new Error(`HTTP ${status}: ${text}`);
-        }
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
 
         const rawText = await response.text();
         console.log(`[9Router API] Phản hồi thô nhận được (Lượt thử ${attemptNumber}):`, rawText);
-        
+
         let aiText = '';
         let data = null;
         let cleanText = rawText.trim();
@@ -611,8 +621,8 @@ ${productContext}`;
                     parsedAnyLine = true;
                     if (chunk.choices && chunk.choices[0]) {
                       const choice = chunk.choices[0];
-                      const deltaText = (choice.delta && choice.delta.content) || 
-                                        (choice.message && choice.message.content) || 
+                      const deltaText = (choice.delta && choice.delta.content) ||
+                                        (choice.message && choice.message.content) ||
                                         choice.text || '';
                       accumulatedContent += deltaText;
                     }
@@ -686,10 +696,11 @@ ${productContext}`;
 
       } catch (error) {
         console.warn(`[9Router API] Thất bại ở lượt thử ${attemptNumber} (còn ${retries} lượt thử lại):`, error);
-        
+
         if (retries > 0) {
           retries--;
           console.log(`[9Router API] Gặp sự cố kết nối. Chờ đợi ${retryDelay / 1000} giây trước khi gửi lại lượt thử 2...`);
+          // Giữ typing indicator hiển thị trong suốt quá trình retry
           await new Promise(resolve => setTimeout(resolve, retryDelay));
         } else {
           // Hết tất cả lượt thử lại, báo lỗi cho người dùng
