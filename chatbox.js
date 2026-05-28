@@ -563,7 +563,29 @@ ${productContext}`;
           throw new Error(`HTTP ${status}: ${text}`);
         }
 
-        const data = await response.json();
+        const rawText = await response.text();
+        
+        // Loại bỏ phần "data: [DONE]" lỗi của 9Router ở cuối JSON (nếu có)
+        let cleanText = rawText.trim();
+        if (cleanText.endsWith('data: [DONE]')) {
+          cleanText = cleanText.substring(0, cleanText.length - 12).trim();
+        }
+
+        let data;
+        try {
+          data = JSON.parse(cleanText);
+        } catch (parseError) {
+          // Khôi phục nâng cao bằng cách tìm vật thể JSON { ... }
+          const firstBrace = cleanText.indexOf('{');
+          const lastBrace = cleanText.lastIndexOf('}');
+          if (firstBrace !== -1 && lastBrace !== -1) {
+            cleanText = cleanText.substring(firstBrace, lastBrace + 1);
+            data = JSON.parse(cleanText);
+          } else {
+            throw parseError;
+          }
+        }
+
         let aiText = '';
         if (data.choices && data.choices[0] && data.choices[0].message) {
           aiText = data.choices[0].message.content;
