@@ -503,6 +503,15 @@
 }
 
 /* ===== MARKDOWN FORMATTING IN CHAT ===== */
+.msg-bubble a {
+  color: #e6556f;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+.msg-bubble a:hover {
+  color: #ff4757;
+}
 .msg-bubble strong, .msg-bubble b {
   font-weight: 700;
   color: #e6556f;

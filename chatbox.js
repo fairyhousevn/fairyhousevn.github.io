@@ -34,16 +34,17 @@ QUY TẮC BẮT BUỘC:
 3. Luôn trả lời bằng tiếng Việt, giọng điệu thân thiện, dễ thương, dùng emoji phù hợp nhưng KHÔNG quá nhiều (tối đa 2-3 emoji/câu trả lời).
 4. Khi gợi ý sản phẩm, LUÔN kèm mã sản phẩm trong dấu ngoặc vuông, ví dụ: [PK.01]. Điều này giúp hệ thống hiển thị card sản phẩm.
 5. Trả lời ngắn gọn, dễ hiểu, tối đa 150 từ. Nếu có nhiều sản phẩm, liệt kê tối đa 4 sản phẩm phù hợp nhất.
-6. Nếu khách muốn mua hàng, hướng dẫn: "Bạn có thể bấm vào sản phẩm để xem chi tiết và đặt hàng, hoặc liên hệ Zalo 0378 791 667 nhé! 💕"
+6. Nếu khách muốn mua hàng, hướng dẫn: "Bạn có thể bấm vào sản phẩm để xem chi tiết và đặt hàng, hoặc liên hệ [Zalo 0378 791 667](https://zalo.me/0378791667) nhé! 💕"
 7. Khi khách chào, hãy chào lại thân thiện và gợi ý xem sản phẩm.
 8. Nếu sản phẩm hết hàng, thông báo và gợi ý sản phẩm tương tự còn hàng.
+9. Khi gửi các link liên hệ như Zalo, Facebook, TikTok, hãy LUÔN viết dưới dạng link markdown [Tên hiển thị](đường_dẫn) để khách bấm được và truy cập trực tiếp luôn.
 
 THÔNG TIN CỬA HÀNG:
 - Tên: Fairy House
 - Địa chỉ: Chợ Mỹ Luông, An Giang
-- SĐT / Zalo: 0378 791 667
-- Facebook: facebook.com/profile.php?id=1127027413834659
-- TikTok: @tienhouse67
+- SĐT / Zalo: [0378 791 667](https://zalo.me/0378791667)
+- Facebook: [Facebook Fairy House](https://www.facebook.com/profile.php?id=1127027413834659)
+- TikTok: [TikTok @tienhouse67](https://www.tiktok.com/@tienhouse67)
 - Giao hàng: Toàn quốc, ship COD
 - Chuyên: Phụ kiện xinh Kitty, móc khoá, quà lưu niệm
 
@@ -432,6 +433,12 @@ ${productContext}`;
   // ===== FORMAT MESSAGE (Markdown-like) =====
   function formatMessage(text) {
     let html = escapeHtml(text);
+    
+    // Markdown links: [text](url) -> <a href="url" target="_blank" rel="noopener noreferrer">text</a>
+    html = html.replace(/\[([^\]]+)\]\(((?:https?:\/\/)?[\w.-]+(?:\.[\w.-]+)+[^\s)]*)\)/g, function(match, text, url) {
+      const href = url.startsWith('http') ? url : 'https://' + url;
+      return `<a href="${href}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+    });
     
     // Bold: **text** or __text__
     html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
