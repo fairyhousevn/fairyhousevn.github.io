@@ -367,10 +367,12 @@ ${productContext}`;
       let aiText = '';
 
       try {
-        // Sử dụng Regex để tìm đối tượng JSON đầu tiên {...} xuất hiện trong chuỗi thô
-        const jsonMatch = rawText.match(/\{[\s\S]*?\}/);
-        if (jsonMatch) {
-          const data = JSON.parse(jsonMatch[0]);
+        // Tìm vị trí bắt đầu "{" đầu tiên và "}" cuối cùng để cắt lấy toàn bộ đối tượng JSON lồng nhau
+        const jsonStart = rawText.indexOf('{');
+        const jsonEnd = rawText.lastIndexOf('}');
+        if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+          const jsonStr = rawText.substring(jsonStart, jsonEnd + 1);
+          const data = JSON.parse(jsonStr);
           if (data.choices && data.choices[0] && data.choices[0].message) {
             aiText = data.choices[0].message.content;
           }
