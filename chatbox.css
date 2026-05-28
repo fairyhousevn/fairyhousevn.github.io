@@ -542,19 +542,19 @@
   }
 
   .chatbox-window {
-    bottom: 16px;
-    right: 12px;
-    left: auto;
-    width: calc(100% - 24px);
-    max-width: 340px;
-    height: 400px;
-    max-height: 50vh;
-    border-radius: 18px;
-    transform: scale(0) translateY(20px);
-    transform-origin: bottom right;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 45vh;
+    max-height: 45vh;
+    border-radius: 20px 20px 0 0;
+    transform: translateY(100%);
+    transform-origin: bottom center;
   }
   .chatbox-window.open {
-    transform: scale(1) translateY(0);
+    transform: translateY(0);
   }
 
   .chatbox-header {
