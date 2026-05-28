@@ -5,7 +5,7 @@
   <script>
     // Tự động kiểm tra phiên bản mới từ server để chống cache index.html
     (function() {
-      const CURRENT_VERSION = "20260527_v16";
+      const CURRENT_VERSION = "20260528_v8";
       if (window.location.protocol === 'file:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         return;
       }
@@ -37,7 +37,8 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <link rel="stylesheet" href="style.css?v=20260527_v16">
+  <link rel="stylesheet" href="style.css?v=20260528_v8">
+  <link rel="stylesheet" href="chatbox.css?v=20260528_v8">
   <!-- FontAwesome for icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="icon" href="logo.jpg">
@@ -56,7 +57,7 @@
     <div class="header-top">
       <!-- Logo & Brand Name -->
       <a href="#" class="header-logo-group" id="logo">
-        <img src="logo.jpg" alt="Fairy House Logo" class="header-logo-img" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧚</text></svg>'">
+        <img src="logo.jpg" alt="Fairy House Logo" class="header-logo-img" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐱</text></svg>'">
         <div class="header-brand-info">
           <h1 class="header-brand-name">Fairy House</h1>
           <span class="header-brand-tagline">Phụ Kiện Xinh &bull; Quà Lưu Niệm</span>
@@ -93,7 +94,7 @@
       <div class="header-middle-inner">
         <p class="header-intro-text">Chuyên phụ kiện xinh Kitty, móc khoá và quà lưu niệm dễ thương tại Chợ Mỹ Luông, An Giang</p>
         <div class="header-social-links">
-          <a href="https://www.facebook.com/profile.php?id=1062931456907313" target="_blank" class="header-social-btn fb"><i class="fa-brands fa-facebook-f"></i> Facebook</a>
+          <a href="https://www.facebook.com/profile.php?id=1127027413834659" target="_blank" class="header-social-btn fb"><i class="fa-brands fa-facebook-f"></i> Facebook</a>
           <a href="https://www.tiktok.com/@tienhouse67" target="_blank" class="header-social-btn tiktok"><i class="fa-brands fa-tiktok"></i> TikTok</a>
           <a href="https://zalo.me/0378791667" target="_blank" class="header-social-btn zalo"><i class="fa-solid fa-comment-dots"></i> Zalo</a>
         </div>
@@ -190,10 +191,10 @@
   <footer class="footer" id="contact">
     <div class="footer-inner">
       <div class="footer-col">
-        <h3>🧚‍♀️ Fairy House</h3>
+        <h3>Fairy House</h3>
         <p>Tiện lợi mỗi ngày. Chuyên cung cấp phụ kiện xinh Kitty, móc khoá và quà lưu niệm dễ thương.</p>
         <div class="footer-social">
-          <a href="https://www.facebook.com/profile.php?id=1062931456907313" target="_blank" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+          <a href="https://www.facebook.com/profile.php?id=1127027413834659" target="_blank" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
           <a href="https://www.tiktok.com/@tienhouse67" target="_blank" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>
           <a href="https://zalo.me/0378791667" target="_blank" title="Zalo"><i class="fa-solid fa-comment-dots"></i></a>
         </div>
@@ -421,6 +422,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-  <script src="script.js?v=20260527_v16"></script>
+  <script src="script.js?v=20260528_v8"></script>
+  <script src="chatbox.js?v=20260528_v8"></script>
 </body>
 </html>
