@@ -391,15 +391,16 @@
 
 /* ===== QUICK REPLIES ===== */
 .chatbox-quick-replies {
-  padding: 8px 16px;
+  padding: 8px 8px;
   display: flex;
   flex-wrap: nowrap;
   overflow-x: auto;
-  gap: 6px;
+  gap: 4px;
   background: white;
   border-top: 1px solid #fff0f3;
   flex-shrink: 0;
   scrollbar-width: none;
+  justify-content: space-between;
 }
 .chatbox-quick-replies::-webkit-scrollbar {
   display: none;
@@ -408,8 +409,8 @@
   background: #fff4f6;
   border: 1px solid #ffc2ce;
   border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 0.78rem;
+  padding: 4px 8px;
+  font-size: 0.72rem;
   font-weight: 600;
   color: #e6556f;
   cursor: pointer;
@@ -582,16 +583,17 @@
     display: flex !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
-    gap: 6px !important;
-    padding: 6px 12px !important;
+    gap: 4px !important;
+    padding: 6px 6px !important;
     scrollbar-width: none !important;
+    justify-content: space-between !important;
   }
   .chatbox-quick-replies::-webkit-scrollbar {
     display: none !important;
   }
   .quick-reply-chip {
-    font-size: 0.75rem !important;
-    padding: 5px 10px !important;
+    font-size: 0.7rem !important;
+    padding: 4px 6px !important;
     flex-shrink: 0 !important;
     white-space: nowrap !important;
   }
