@@ -31,9 +31,6 @@ Hệ thống trợ lý AI "Fairy" được cấu hình gọi trực tiếp **Goo
      - 🔴 **Màu đỏ**: Gặp lỗi hoặc hết hạn mức (`error`).
    - Đã ẩn hoàn toàn các nhãn văn bản và tooltip hover để giữ giao diện tối giản nhất.
 
-### Danh sách 4 API Key sử dụng trong [chatbox.js](file:///d:/Web/Tiencase/chatbox.js):
-* Key 1: `AIzaSyAen3XHVLyTUlLxdKIHp8LDK8004YU3kQI`
-* Key 2: `AIzaSyCrelZBi1xfPdlgHZujKfZ_kDOMKnAsDNo`
-* Key 3: `AIzaSyD_Dew5x076_DPV6iehhIiuQd5ngTNh0lQ`
-* Key 4: `AIzaSyA_AHJhvE5pjLIdvKo_YliUasdIWP5B58E`
+### Danh sách 4 API Key sử dụng:
+Các API key đã được chuyển hoàn toàn vào **Vercel Environment Variables** (`GEMINI_KEY_1`, `GEMINI_KEY_2`, `GEMINI_KEY_3`, `GEMINI_KEY_4`) để đảm bảo bảo mật tuyệt đối, tránh bị lộ khi đưa mã nguồn lên GitHub.
 
