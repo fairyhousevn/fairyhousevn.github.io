@@ -129,6 +129,34 @@ ${productContext}`;
     `;
     document.body.appendChild(container);
 
+    // Ủy quyền sự kiện (Event Delegation) cho việc click vào card sản phẩm trong chat
+    container.addEventListener('click', (e) => {
+      const card = e.target.closest('.chat-product-card');
+      if (card) {
+        let idVal = card.getAttribute('data-id');
+        let codeVal = card.getAttribute('data-code');
+        
+        // Fallback cho lịch sử chat cũ không chứa thuộc tính data-*
+        if (!codeVal) {
+          const nameEl = card.querySelector('.chat-product-name');
+          if (nameEl) {
+            codeVal = nameEl.textContent.split(' - ')[0];
+          }
+        }
+
+        if (typeof openProductModal === 'function') {
+          let id = parseInt(idVal);
+          if (isNaN(id) && typeof products !== 'undefined' && codeVal) {
+            const found = products.find(p => p.code === codeVal);
+            if (found) id = found.id;
+          }
+          if (!isNaN(id)) {
+            openProductModal(id);
+          }
+        }
+      }
+    });
+
     // Bind events
     document.getElementById('chatboxToggle').addEventListener('click', toggleChatbox);
     document.getElementById('chatboxClose').addEventListener('click', toggleChatbox);
@@ -281,11 +309,8 @@ ${productContext}`;
   function createProductCard(product) {
     const card = document.createElement('div');
     card.className = 'chat-product-card';
-    card.onclick = () => {
-      if (typeof openProductModal === 'function') {
-        openProductModal(product.id);
-      }
-    };
+    card.setAttribute('data-id', product.id);
+    card.setAttribute('data-code', product.code);
     card.innerHTML = `
       <img src="${product.img}" alt="${product.name}" class="chat-product-img"
            onerror="this.src='product_image.jpg'">
@@ -518,21 +543,7 @@ ${productContext}`;
           if (quickReplies) quickReplies.style.display = 'none';
         }
 
-        // Re-bind product card click events
-        document.querySelectorAll('.chat-product-card').forEach(card => {
-          const nameEl = card.querySelector('.chat-product-name');
-          if (nameEl && typeof products !== 'undefined') {
-            const code = nameEl.textContent.split(' - ')[0];
-            const product = products.find(p => p.code === code);
-            if (product) {
-              card.onclick = () => {
-                if (typeof openProductModal === 'function') {
-                  openProductModal(product.id);
-                }
-              };
-            }
-          }
-        });
+
       }
     } catch (e) { /* ignore */ }
   }
