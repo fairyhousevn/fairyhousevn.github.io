@@ -616,11 +616,13 @@
 /* ===== SMOOTH SHIFT TO PREVENT OVERLAPPING PRODUCTS ===== */
 .products-section {
   transition: padding-right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  transition-delay: 0.35s !important; /* Đợi chatbox đóng xong (350ms) rồi mới giãn rộng ra */
   will-change: padding-right;
 }
 
 @media (min-width: 769px) {
   body.chatbox-is-open .products-section {
     padding-right: 420px !important;
+    transition-delay: 0s !important; /* Co lại ngay lập tức khi mở chatbox */
   }
 }
