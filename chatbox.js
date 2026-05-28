@@ -5,14 +5,56 @@
 (function() {
   'use strict';
 
-  // ===== CẤU HÌNH 9ROUTER PROXY =====
-  const NINE_ROUTER_KEY = "sk-50ed9f833897dfa8-314oks-2608b897";
-  const NINE_ROUTER_MODEL = "chatboxweb";
-  const NINE_ROUTER_API_URL = "https://rlf2des.abc-tunnel.us/v1/chat/completions";
+  // ===== CẤU HÌNH GEMINI API TRỰC TIẾP =====
+  const GEMINI_KEYS = [
+    "AIzaSyAen3XHVLyTUlLxdKIHp8LDK8004YU3kQI",
+    "AIzaSyCrelZBi1xfPdlgHZujKfZ_kDOMKnAsDNo",
+    "AIzaSyD_Dew5x076_DPV6iehhIiuQd5ngTNh0lQ",
+    "AIzaSyA_AHJhvE5pjLIdvKo_YliUasdIWP5B58E"
+  ];
+  const GEMINI_MODEL = "gemini-2.5-flash";
   
   const MAX_HISTORY = 6; // Giới hạn context lịch sử chat
-  const RATE_LIMIT_MS = 2000; // Khôi phục rate limit 2 giây vì 9Router có cơ chế xoay vòng miễn phí tốt
+  const RATE_LIMIT_MS = 2000; // Khôi phục rate limit 2 giây
   const API_TIMEOUT_MS = 30000; // Timeout 30 giây
+
+  let currentKeyIndex = 0; // Chỉ số key hiện tại xoay vòng (round robin)
+
+  // Trạng thái hoạt động của từng key
+  const keyStatus = GEMINI_KEYS.map((key, i) => ({
+    id: i + 1,
+    label: `Key ${i + 1}`,
+    key: key,
+    totalCalls: 0,
+    errors: 0,
+    status: 'idle' // 'idle' | 'active' | 'success' | 'error'
+  }));
+
+  // Lấy key tiếp theo theo vòng tròn
+  function getNextKey() {
+    const keyInfo = keyStatus[currentKeyIndex];
+    currentKeyIndex = (currentKeyIndex + 1) % GEMINI_KEYS.length;
+    return keyInfo;
+  }
+
+  // Cập nhật giao diện của 4 chấm tròn giám sát key
+  function updateKeyMonitorUI() {
+    keyStatus.forEach(k => {
+      const dots = document.querySelectorAll(`.key-dot[data-key-id="${k.id}"]`);
+      dots.forEach(dot => {
+        dot.className = `key-dot ${k.status}`;
+        dot.setAttribute('title', `Key ${k.id} (${k.status.toUpperCase()})\n- Đã dùng: ${k.totalCalls} lần\n- Lỗi: ${k.errors} lần`);
+      });
+    });
+  }
+
+  function setKeyStatus(keyId, status) {
+    const key = keyStatus.find(k => k.id === keyId);
+    if (key) {
+      key.status = status;
+      updateKeyMonitorUI();
+    }
+  }
 
   // ===== SYSTEM PROMPT =====
   function buildSystemPrompt() {
@@ -102,8 +144,15 @@ ${productContext}`;
             <div class="chatbox-header-name">Fairy House</div>
             <div class="chatbox-header-status">
               <span class="chatbox-status-dot"></span>
-              Luôn sẵn sàng hỗ trợ bạn
+              <span id="chatboxStatusText">Luôn sẵn sàng hỗ trợ bạn</span>
             </div>
+          </div>
+          <!-- Giao diện giám sát 4 key dạng chấm tròn chuyên nghiệp -->
+          <div class="key-monitor" id="keyMonitor" title="Trạng thái hệ thống xoay vòng key">
+            <span class="key-dot idle" data-key-id="1" title="Key 1: Chờ (idle)"></span>
+            <span class="key-dot idle" data-key-id="2" title="Key 2: Chờ (idle)"></span>
+            <span class="key-dot idle" data-key-id="3" title="Key 3: Chờ (idle)"></span>
+            <span class="key-dot idle" data-key-id="4" title="Key 4: Chờ (idle)"></span>
           </div>
           <button class="chatbox-header-close" id="chatboxClose" title="Đóng">✕</button>
         </div>
@@ -192,6 +241,9 @@ ${productContext}`;
 
     // Load chat history from sessionStorage
     loadChatHistory();
+
+    // Khởi tạo trạng thái chấm tròn giám sát key
+    updateKeyMonitorUI();
 
     // Nếu mặc định mở chatbox, thêm class dịch chuyển layout cho body
     if (isOpen) {
@@ -476,138 +528,153 @@ ${productContext}`;
   }
 
   // ===== GỌI 9ROUTER API =====
-  async function callGemini(userMessage, retries = 2) {
+  async function callGemini(userMessage, attempt = 1) {
+    // Nếu đã thử quá số lượng key có sẵn, dừng lại báo lỗi
+    if (attempt > GEMINI_KEYS.length) {
+      hideTyping();
+      
+      const statusTextEl = document.getElementById('chatboxStatusText');
+      if (statusTextEl) {
+        statusTextEl.textContent = 'Fairy tạm thời bận';
+        statusTextEl.style.color = '#ef4444';
+      }
+
+      const errorMsg = 'Fairy hiện tại đang có quá nhiều khách hàng nhắn tin cùng lúc nên các API key đều bị quá tải (Rate Limit). Bạn chờ khoảng 1 phút rồi thử nhắn lại nhé! 💕 Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để Fairy trả lời trực tiếp ngay nha!';
+      addMessage('error', errorMsg);
+      return;
+    }
+
+    const keyInfo = getNextKey();
+    const apiKey = keyInfo.key;
+    
+    // Thiết lập trạng thái key đang hoạt động
+    setKeyStatus(keyInfo.id, 'active');
+    keyInfo.totalCalls++;
+
+    const statusTextEl = document.getElementById('chatboxStatusText');
+    if (statusTextEl) {
+      statusTextEl.textContent = `🔑 Key ${keyInfo.id} đang trả lời...`;
+      statusTextEl.style.color = '#fff6f7';
+      statusTextEl.style.fontWeight = '700';
+    }
+
     try {
       const systemPrompt = buildSystemPrompt();
       const historySlice = chatHistory.slice(-MAX_HISTORY);
 
-      // Cấu trúc request body chuẩn OpenAI API để gửi tới 9Router
-      const messages = [
-        { role: 'system', content: systemPrompt },
-        ...historySlice
-      ];
+      // Cấu trúc message cho Gemini API
+      let contents = [];
+      let lastRole = null;
+      for (const item of historySlice) {
+        const role = item.role === 'assistant' || item.role === 'model' ? 'model' : 'user';
+        // Gộp tin nhắn nếu trùng vai trò liên tiếp
+        if (role === lastRole) {
+          if (contents.length > 0) {
+            contents[contents.length - 1].parts[0].text += '\n' + item.content;
+          }
+        } else {
+          contents.push({
+            role: role,
+            parts: [{ text: item.content }]
+          });
+          lastRole = role;
+        }
+      }
+
+      // Đảm bảo tin nhắn đầu tiên phải là của 'user'
+      while (contents.length > 0 && contents[0].role !== 'user') {
+        contents.shift();
+      }
+
+      // Nếu lịch sử rỗng (ví dụ sau khi shift), thêm tin nhắn hiện tại của user vào
+      if (contents.length === 0) {
+        contents.push({
+          role: 'user',
+          parts: [{ text: userMessage }]
+        });
+      }
 
       const requestBody = {
-        model: NINE_ROUTER_MODEL,
-        messages: messages,
-        max_tokens: 2000,
-        stream: false
+        contents: contents,
+        systemInstruction: {
+          parts: [{ text: systemPrompt }]
+        },
+        generationConfig: {
+          maxOutputTokens: 2000,
+          temperature: 0.7
+        }
       };
+
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), API_TIMEOUT_MS);
 
       let response;
       try {
-        response = await fetch(NINE_ROUTER_API_URL, {
+        response = await fetch(endpoint, {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${NINE_ROUTER_KEY}`
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify(requestBody),
           signal: controller.signal
         });
       } catch (fetchError) {
         clearTimeout(timeoutId);
-        // Hỗ trợ tự động thử lại nếu gặp lỗi mạng thô (DNS, CORS, rớt mạng, hoặc Tunnel ngủ chưa thức giấc)
-        if (retries > 0) {
-          console.warn(`Mất kết nối hoặc Tunnel đang ngủ (${fetchError.message || fetchError}). Đang thử lại sau 3 giây... (Còn ${retries} lượt thử)`);
-          await new Promise(resolve => setTimeout(resolve, 3000));
-          return callGemini(userMessage, retries - 1);
-        }
         throw fetchError;
       }
 
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        // Hỗ trợ tự động thử lại nếu gặp lỗi từ 9Router (429 hoặc lỗi server >= 500)
-        if ((response.status === 429 || response.status >= 500) && retries > 0) {
-          console.warn(`9Router phản hồi mã lỗi ${response.status}. Đang thử lại sau 3 giây... (Còn ${retries} lượt thử)`);
-          await new Promise(resolve => setTimeout(resolve, 3000));
-          return callGemini(userMessage, retries - 1);
-        }
-        throw new Error(`API error: ${response.status}`);
+        const errText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errText || response.statusText}`);
       }
 
-      // 9Router trả về dạng text/event-stream (SSE) hoặc JSON thô.
-      // Cần xử lý cả 2 format: streaming (data: {...}) và non-streaming ({...})
-      const rawText = await response.text();
+      const data = await response.json();
+      
       let aiText = '';
-
-      try {
-        // Bước 1: Thử parse SSE format (text/event-stream)
-        // Mỗi dòng có dạng "data: {JSON}" hoặc "data: [DONE]"
-        const sseLines = rawText.split('\n')
-          .map(line => line.trim())
-          .filter(line => line.startsWith('data: ') && line !== 'data: [DONE]');
-
-        if (sseLines.length > 0) {
-          // Thử từng dòng SSE
-          for (const line of sseLines) {
-            try {
-              const jsonStr = line.substring(6); // Bỏ "data: "
-              const data = JSON.parse(jsonStr);
-
-              // Format non-streaming: choices[0].message.content (toàn bộ text trong 1 chunk)
-              if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
-                aiText = data.choices[0].message.content;
-                break; // Đã lấy được toàn bộ text, không cần duyệt tiếp
-              }
-
-              // Format streaming: choices[0].delta.content (text chia thành nhiều mảnh nhỏ)
-              if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
-                aiText += data.choices[0].delta.content;
-              }
-            } catch (lineErr) {
-              // Bỏ qua dòng SSE không parse được (có thể là metadata)
-            }
-          }
-        }
-
-        // Bước 2: Nếu SSE không trích xuất được text, fallback tìm JSON thô trong response
-        if (!aiText) {
-          const jsonStart = rawText.indexOf('{');
-          const jsonEnd = rawText.lastIndexOf('}');
-          if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-            const jsonStr = rawText.substring(jsonStart, jsonEnd + 1);
-            const data = JSON.parse(jsonStr);
-            if (data.choices && data.choices[0] && data.choices[0].message) {
-              aiText = data.choices[0].message.content;
-            }
-          }
-        }
-      } catch (parseErr) {
-        console.error('Failed to parse 9Router response:', parseErr, 'Raw:', rawText.substring(0, 500));
+      if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts && data.candidates[0].content.parts[0]) {
+        aiText = data.candidates[0].content.parts[0].text;
       }
 
       if (!aiText) {
-        console.error('Empty AI response. Raw text preview:', rawText.substring(0, 500));
-        throw new Error('Could not extract text response from 9Router');
+        throw new Error('Phản hồi rỗng từ Gemini API');
       }
 
-      // Add to history
+      // Đánh dấu key thành công
+      setKeyStatus(keyInfo.id, 'success');
+
+      // Khôi phục trạng thái header
+      if (statusTextEl) {
+        statusTextEl.textContent = 'Luôn sẵn sàng hỗ trợ bạn';
+        statusTextEl.style.color = '';
+        statusTextEl.style.fontWeight = '';
+      }
+
+      // Lưu lịch sử chat
       chatHistory.push({ role: 'assistant', content: aiText });
 
-      // Find mentioned products
+      // Tìm sản phẩm được nhắc tới
       const mentionedProducts = findMentionedProducts(aiText);
 
-      // Hide typing and show response
+      // Ẩn typing và hiển thị tin nhắn
       hideTyping();
       addMessage('ai', aiText, mentionedProducts);
 
     } catch (error) {
-      console.error('9Router API Error sau các lượt thử lại:', error);
-      hideTyping();
+      console.error(`[Gemini API] Lỗi với Key ${keyInfo.id}:`, error);
+      
+      // Đánh dấu key lỗi
+      setKeyStatus(keyInfo.id, 'error');
+      keyInfo.errors++;
 
-      // DEBUG: Hiển thị chi tiết lỗi để xác định nguyên nhân chính xác
-      const debugInfo = `[DEBUG] Lỗi: ${error.name || 'Unknown'} | ${error.message || 'No message'} | URL: ${NINE_ROUTER_API_URL}`;
-      console.error(debugInfo);
-
-      let errorMsg = 'Fairy đang offline bạn chờ chút rồi thử lại nhé! 💕 Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ nhanh!<br><br><small style="color:#999;font-size:11px;">' + debugInfo + '</small>';
-
-      addMessage('error', errorMsg);
+      // Đang thử lại với key tiếp theo
+      console.warn(`Key ${keyInfo.id} thất bại. Đang tự động chuyển sang key tiếp theo... (Lượt thử: ${attempt}/${GEMINI_KEYS.length})`);
+      
+      // Thử lại ngay lập tức với key tiếp theo
+      return callGemini(userMessage, attempt + 1);
     }
   }
 
