@@ -969,6 +969,10 @@ body {
   }
   .products-section {
     scroll-margin-top: 95px; /* Bù khoảng cách cho menu dính sau khi đã co trên mobile */
+    padding: 0 12px !important; /* Tràn ngang rộng rãi trên di động */
+  }
+  .map-section {
+    padding: 0 12px !important; /* Đồng bộ tràn ngang di động */
   }
 
   /* Cấu hình hàng giới thiệu & MXH trên mobile khi chưa cuộn */

@@ -112,7 +112,6 @@ ${productContext}`;
 
         <!-- Quick Replies -->
         <div class="chatbox-quick-replies" id="chatboxQuickReplies">
-          <button class="quick-reply-chip" data-msg="Có sản phẩm mới gì?">🆕 Sản phẩm mới</button>
           <button class="quick-reply-chip" data-msg="Sản phẩm nào bán chạy nhất?">🔥 Bán chạy</button>
           <button class="quick-reply-chip" data-msg="Gợi ý quà tặng dễ thương">🎁 Gợi ý quà</button>
           <button class="quick-reply-chip" data-msg="Địa chỉ và liên hệ cửa hàng">📍 Liên hệ</button>

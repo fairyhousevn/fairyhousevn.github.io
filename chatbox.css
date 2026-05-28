@@ -393,11 +393,16 @@
 .chatbox-quick-replies {
   padding: 8px 16px;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
   gap: 6px;
   background: white;
   border-top: 1px solid #fff0f3;
   flex-shrink: 0;
+  scrollbar-width: none;
+}
+.chatbox-quick-replies::-webkit-scrollbar {
+  display: none;
 }
 .quick-reply-chip {
   background: #fff4f6;
@@ -411,6 +416,7 @@
   transition: all 0.2s;
   font-family: 'Quicksand', sans-serif;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 .quick-reply-chip:hover {
   background: #ffe3e8;
