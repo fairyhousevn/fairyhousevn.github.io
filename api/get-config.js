@@ -52,9 +52,21 @@ export default async function handler(req, res) {
   const eu = encode(url);
   const em = encode(model);
 
+  // Debug thông tin các biến môi trường liên quan đến NINE (chỉ trả về độ dài và tên để bảo mật)
+  const debugEnv = {};
+  for (const k of Object.keys(process.env)) {
+    if (k.toLowerCase().includes('nine')) {
+      debugEnv[k] = {
+        length: process.env[k] ? process.env[k].length : 0,
+        exists: !!process.env[k]
+      };
+    }
+  }
+
   return res.status(200).json({
     ek,
     eu,
-    em
+    em,
+    _debug: debugEnv
   });
 }
