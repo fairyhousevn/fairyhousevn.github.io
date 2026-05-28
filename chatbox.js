@@ -50,7 +50,7 @@ THÔNG TIN CỬA HÀNG:
 - Tên: Fairy House
 - Địa chỉ: Chợ Mỹ Luông, An Giang
 - SĐT / Zalo: [0378 791 667](https://zalo.me/0378791667)
-- Facebook: [Facebook Fairy House](https://www.facebook.com/profile.php?id=1127027413834659)
+- Facebook: [Facebook Fairy House](https://www.facebook.com/fairyhouse67)
 - TikTok: [TikTok @tienhouse67](https://www.tiktok.com/@tienhouse67)
 - Giao hàng: Toàn quốc, ship COD
 - Chuyên: Phụ kiện xinh Kitty, móc khoá, quà lưu niệm
