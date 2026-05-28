@@ -561,28 +561,24 @@ ${productContext}`;
 
   // ===== TÍNH TOÁN VỊ TRÍ TƯƠNG ĐỐI TRÁNH ẢNH HƯỞNG ANIMATION =====
   function getRelativeOffsetTop(element, container) {
-    let offsetTop = 0;
-    let curr = element;
-    while (curr && curr !== container) {
-      offsetTop += curr.offsetTop;
-      curr = curr.offsetParent;
-    }
-    return offsetTop;
+    // Với .chatbox-messages có position: relative, offsetParent của element sẽ chính là container.
+    // Lấy trực tiếp element.offsetTop là chuẩn nhất, nhanh nhất và không bị lỗi lặp vòng ngoài.
+    return element.offsetTop || 0;
   }
 
   // ===== SCROLL TO MESSAGE =====
   function scrollToMessage(msgDiv, behavior = 'smooth') {
     const messagesEl = document.getElementById('chatboxMessages');
     if (messagesEl && msgDiv) {
-      // Đợi 50ms để layout ổn định rồi thực hiện cuộn DUY NHẤT một lần cực kỳ mượt mà
-      // Tránh cuộn nhiều lần gây giật lag hoặc tranh chấp khi người dùng kéo (vuốt) màn hình
+      // Đợi 100ms để layout và các thẻ HTML được render hoàn thiện, sau đó cuộn mượt mà
+      // lên vị trí đầu dòng của tin nhắn đó.
       setTimeout(() => {
         const targetScrollTop = getRelativeOffsetTop(msgDiv, messagesEl) - 8;
         messagesEl.scrollTo({
           top: targetScrollTop,
           behavior: behavior
         });
-      }, 50);
+      }, 100);
     }
   }
 
