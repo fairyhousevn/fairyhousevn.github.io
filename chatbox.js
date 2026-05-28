@@ -490,7 +490,8 @@ ${productContext}`;
       const requestBody = {
         model: NINE_ROUTER_MODEL,
         messages: messages,
-        max_tokens: 2000
+        max_tokens: 2000,
+        stream: false
       };
 
       const controller = new AbortController();
@@ -530,26 +531,59 @@ ${productContext}`;
         throw new Error(`API error: ${response.status}`);
       }
 
-      // 9Router có thể trả về text thô chứa chuỗi JSON kèm theo các ký tự xuống dòng và text thừa như "data: [DONE]"
+      // 9Router trả về dạng text/event-stream (SSE) hoặc JSON thô.
+      // Cần xử lý cả 2 format: streaming (data: {...}) và non-streaming ({...})
       const rawText = await response.text();
       let aiText = '';
 
       try {
-        // Tìm vị trí bắt đầu "{" đầu tiên và "}" cuối cùng để cắt lấy toàn bộ đối tượng JSON lồng nhau
-        const jsonStart = rawText.indexOf('{');
-        const jsonEnd = rawText.lastIndexOf('}');
-        if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
-          const jsonStr = rawText.substring(jsonStart, jsonEnd + 1);
-          const data = JSON.parse(jsonStr);
-          if (data.choices && data.choices[0] && data.choices[0].message) {
-            aiText = data.choices[0].message.content;
+        // Bước 1: Thử parse SSE format (text/event-stream)
+        // Mỗi dòng có dạng "data: {JSON}" hoặc "data: [DONE]"
+        const sseLines = rawText.split('\n')
+          .map(line => line.trim())
+          .filter(line => line.startsWith('data: ') && line !== 'data: [DONE]');
+
+        if (sseLines.length > 0) {
+          // Thử từng dòng SSE
+          for (const line of sseLines) {
+            try {
+              const jsonStr = line.substring(6); // Bỏ "data: "
+              const data = JSON.parse(jsonStr);
+
+              // Format non-streaming: choices[0].message.content (toàn bộ text trong 1 chunk)
+              if (data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) {
+                aiText = data.choices[0].message.content;
+                break; // Đã lấy được toàn bộ text, không cần duyệt tiếp
+              }
+
+              // Format streaming: choices[0].delta.content (text chia thành nhiều mảnh nhỏ)
+              if (data.choices && data.choices[0] && data.choices[0].delta && data.choices[0].delta.content) {
+                aiText += data.choices[0].delta.content;
+              }
+            } catch (lineErr) {
+              // Bỏ qua dòng SSE không parse được (có thể là metadata)
+            }
+          }
+        }
+
+        // Bước 2: Nếu SSE không trích xuất được text, fallback tìm JSON thô trong response
+        if (!aiText) {
+          const jsonStart = rawText.indexOf('{');
+          const jsonEnd = rawText.lastIndexOf('}');
+          if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
+            const jsonStr = rawText.substring(jsonStart, jsonEnd + 1);
+            const data = JSON.parse(jsonStr);
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+              aiText = data.choices[0].message.content;
+            }
           }
         }
       } catch (parseErr) {
-        console.error('Failed to parse 9Router JSON:', parseErr);
+        console.error('Failed to parse 9Router response:', parseErr, 'Raw:', rawText.substring(0, 500));
       }
 
       if (!aiText) {
+        console.error('Empty AI response. Raw text preview:', rawText.substring(0, 500));
         throw new Error('Could not extract text response from 9Router');
       }
 
