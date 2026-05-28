@@ -44,7 +44,11 @@ QUY TẮC BẮT BUỘC:
     - **Tên sản phẩm** [Mã_sản_phẩm]
       🔥 Đã bán: [Số_lượng_đã_bán] | Giá: [Giá]
       📌 Tình trạng: Còn hàng (Còn [Số_tồn] sản phẩm) / Hết hàng
-
+12. Về giao hàng và phí ship:
+    - Nếu tổng tiền hàng từ 199k trở lên (>= 199.000₫): miễn phí vận chuyển (FREE SHIP).
+    - Nếu tổng tiền hàng dưới 199k (< 199.000₫): phí ship đồng giá 20k toàn quốc.
+    - Thời gian giao hàng toàn quốc là từ 2 đến 3 ngày.
+13. Khi khách yêu cầu gợi ý quà tặng (hoặc "gợi ý quà", "quà tặng", "tìm quà", v.v.), hãy tư vấn nhiệt tình và giới thiệu các sản phẩm bán chạy nhất trong các danh mục: Phụ Kiện Xinh, Móc Khoá, và Quà Lưu Niệm (mỗi danh mục giới thiệu 2 món bán chạy nhất dựa trên cột Đã bán cao nhất).
 
 THÔNG TIN CỬA HÀNG:
 - Tên: Fairy House
@@ -52,7 +56,8 @@ THÔNG TIN CỬA HÀNG:
 - SĐT / Zalo: [0378 791 667](https://zalo.me/0378791667)
 - Facebook: [Facebook Fairy House](https://www.facebook.com/fairyhouse67)
 - TikTok: [TikTok @tienhouse67](https://www.tiktok.com/@tienhouse67)
-- Giao hàng: Toàn quốc, ship COD
+- Giao hàng & Phí ship: Toàn quốc, ship COD. Miễn phí giao hàng (FREE SHIP) cho đơn hàng từ 199k trở lên; đơn hàng dưới 199k phí ship đồng giá là 20k.
+- Thời gian giao hàng: từ 2 đến 3 ngày.
 - Chuyên: Phụ kiện xinh Kitty, móc khoá, quà lưu niệm
 
 DANH SÁCH SẢN PHẨM HIỆN CÓ:
@@ -263,6 +268,69 @@ ${productContext}`;
     addMessage('ai', aiText, top5);
   }
 
+  // ===== PHẢN HỒI GỢI Ý QUÀ TẶNG =====
+  function respondWithGiftSuggestions() {
+    hideTyping();
+    if (typeof products === 'undefined' || !products.length) {
+      const errorMsg = "Fairy chưa tải được danh sách sản phẩm để gợi ý quà, bạn chờ chút nhé! 💕";
+      addMessage('ai', errorMsg);
+      chatHistory.push({ role: 'assistant', content: errorMsg });
+      return;
+    }
+
+    // Lấy 2 sản phẩm bán chạy nhất trong Phụ Kiện
+    const topPhuKien = [...products]
+      .filter(p => p.category === 'Phụ Kiện')
+      .sort((a, b) => (parseInt(b.sold) || 0) - (parseInt(a.sold) || 0))
+      .slice(0, 2);
+
+    // Lấy 2 sản phẩm bán chạy nhất trong Móc Khoá
+    const topMocKhoa = [...products]
+      .filter(p => p.category === 'Móc Khoá')
+      .sort((a, b) => (parseInt(b.sold) || 0) - (parseInt(a.sold) || 0))
+      .slice(0, 2);
+
+    // Lấy 2 sản phẩm bán chạy nhất trong Quà Lưu Niệm
+    const topQuaLuuNiem = [...products]
+      .filter(p => p.category === 'Quà Lưu Niệm')
+      .sort((a, b) => (parseInt(b.sold) || 0) - (parseInt(a.sold) || 0))
+      .slice(0, 2);
+
+    // Hợp nhất danh sách sản phẩm gợi ý
+    const suggestedProducts = [...topPhuKien, ...topMocKhoa, ...topQuaLuuNiem];
+
+    let aiText = "🎁 Fairy gợi ý cho bạn những **món quà tặng cực kỳ xinh xắn và dễ thương** được yêu thích nhất (top 2 bán chạy nhất mỗi danh mục):\n\n";
+
+    if (topPhuKien.length > 0) {
+      aiText += "🌸 **Phụ Kiện Xinh:**\n";
+      topPhuKien.forEach(p => {
+        aiText += `- **${p.name}** [${p.code}] | Đã bán: ${p.sold || 0} | Giá: ${p.price}\n`;
+      });
+      aiText += "\n";
+    }
+
+    if (topMocKhoa.length > 0) {
+      aiText += "🔑 **Móc Khoá Cute:**\n";
+      topMocKhoa.forEach(p => {
+        aiText += `- **${p.name}** [${p.code}] | Đã bán: ${p.sold || 0} | Giá: ${p.price}\n`;
+      });
+      aiText += "\n";
+    }
+
+    if (topQuaLuuNiem.length > 0) {
+      aiText += "🎈 **Quà Lưu Niệm Dễ Thương:**\n";
+      topQuaLuuNiem.forEach(p => {
+        aiText += `- **${p.name}** [${p.code}] | Đã bán: ${p.sold || 0} | Giá: ${p.price}\n`;
+      });
+      aiText += "\n";
+    }
+
+    aiText += "💕 Bạn có thể bấm trực tiếp vào thẻ sản phẩm bên dưới để xem chi tiết và đặt mua nha!";
+
+    chatHistory.push({ role: 'assistant', content: aiText });
+    addMessage('ai', aiText, suggestedProducts);
+  }
+
   // ===== GỬI TIN NHẮN =====
   function handleSend() {
     if (isWaiting) return;
@@ -295,6 +363,13 @@ ${productContext}`;
     if (normalizedText.includes('ban chay') || normalizedText.includes('best seller') || normalizedText.includes('hot nhat') || (normalizedText.includes('san pham') && normalizedText.includes('hot'))) {
       setTimeout(() => {
         respondWithBestSellers();
+      }, 800);
+      return;
+    }
+
+    if (normalizedText.includes('goi y qua') || normalizedText.includes('qua tang') || normalizedText.includes('tim qua') || normalizedText.includes('qua de thuong') || normalizedText.includes('tu van qua') || normalizedText.includes('mua qua')) {
+      setTimeout(() => {
+        respondWithGiftSuggestions();
       }, 800);
       return;
     }
