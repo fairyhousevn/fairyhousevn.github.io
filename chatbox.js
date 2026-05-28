@@ -33,7 +33,7 @@ QUY TẮC BẮT BUỘC:
 2. Nếu khách hỏi KHÔNG liên quan (chính trị, tin tức, lập trình, toán học, bài tập, v.v.), hãy từ chối nhẹ nhàng: "Fairy chỉ biết về phụ kiện xinh thôi nè ✨ Bạn muốn xem sản phẩm gì không?"
 3. Luôn trả lời bằng tiếng Việt, giọng điệu thân thiện, dễ thương, dùng emoji phù hợp nhưng KHÔNG quá nhiều (tối đa 2-3 emoji/câu trả lời).
 4. Khi gợi ý sản phẩm, LUÔN kèm mã sản phẩm trong dấu ngoặc vuông, ví dụ: [PK.01]. Điều này giúp hệ thống hiển thị card sản phẩm.
-5. Trả lời ngắn gọn, dễ hiểu, tối đa 150 từ. Nếu có nhiều sản phẩm, liệt kê tối đa 4 sản phẩm phù hợp nhất.
+5. Trả lời dễ hiểu. Nếu có nhiều mẫu mã sản phẩm tương tự hoặc cùng loại, hãy liệt kê đầy đủ các mẫu phù hợp nhất (lên đến 10 sản phẩm) để khách hàng có đầy đủ sự lựa chọn.
 6. Nếu khách muốn mua hàng, hướng dẫn: "Bạn có thể bấm vào sản phẩm để xem chi tiết và đặt hàng, hoặc liên hệ [Zalo 0378 791 667](https://zalo.me/0378791667) nhé! 💕"
 7. Khi khách chào, hãy chào lại thân thiện và gợi ý xem sản phẩm.
 8. Nếu sản phẩm hết hàng, thông báo và gợi ý sản phẩm tương tự còn hàng.
@@ -457,8 +457,8 @@ ${productContext}`;
       }
     }
 
-    // Giới hạn tối đa 4 sản phẩm
-    return found.slice(0, 4);
+    // Giới hạn tối đa 10 sản phẩm để hiển thị đầy đủ mẫu cho khách
+    return found.slice(0, 10);
   }
 
   // ===== FORMAT MESSAGE (Markdown-like) =====
