@@ -31,11 +31,11 @@ export default async function handler(req, res) {
 
   // Lấy danh sách API keys từ Environment Variables (an toàn, không ai thấy được)
   const GEMINI_KEYS = [
-    process.env.GEMINI_KEY_1,
-    process.env.GEMINI_KEY_2,
-    process.env.GEMINI_KEY_3,
-    process.env.GEMINI_KEY_4
-  ].filter(Boolean); // Loại bỏ các key undefined/null
+    { id: 1, key: process.env.GEMINI_KEY_1 },
+    { id: 2, key: process.env.GEMINI_KEY_2 },
+    { id: 3, key: process.env.GEMINI_KEY_3 },
+    { id: 4, key: process.env.GEMINI_KEY_4 }
+  ].filter(item => !!item.key); // Chỉ lấy các key được cấu hình
 
   if (GEMINI_KEYS.length === 0) {
     return res.status(500).json({ error: 'No API keys configured' });
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
   const GEMINI_MODEL = 'gemini-2.5-flash';
 
   // Lấy dữ liệu từ request body của frontend
-  const { contents, systemInstruction, generationConfig } = req.body;
+  const { contents, systemInstruction, generationConfig, preferredKeyIndex } = req.body;
 
   if (!contents || !Array.isArray(contents)) {
     return res.status(400).json({ error: 'Invalid request body: missing contents' });
@@ -64,11 +64,21 @@ export default async function handler(req, res) {
     requestBody.systemInstruction = systemInstruction;
   }
 
-  // Thử lần lượt từng key (round-robin xoay vòng)
+  // Xác định vị trí bắt đầu thử key (Sequential Round-Robin do frontend chỉ định)
+  const preferredId = parseInt(preferredKeyIndex) || 1;
+  const startIndex = GEMINI_KEYS.findIndex(k => k.id === preferredId) !== -1
+    ? GEMINI_KEYS.findIndex(k => k.id === preferredId)
+    : 0;
+
+  // Trạng thái của các key được thử trong lượt này để trả về cho frontend hiển thị
+  const keyStatuses = {};
   let lastError = null;
 
   for (let i = 0; i < GEMINI_KEYS.length; i++) {
-    const apiKey = GEMINI_KEYS[i];
+    const currentIndex = (startIndex + i) % GEMINI_KEYS.length;
+    const keyObj = GEMINI_KEYS[currentIndex];
+    const apiKey = keyObj.key;
+    const keyId = keyObj.id;
     const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
 
     try {
@@ -86,36 +96,33 @@ export default async function handler(req, res) {
 
       if (response.ok) {
         const data = await response.json();
-        // Trả về kết quả kèm thông tin key nào đã xử lý (chỉ gửi số thứ tự, không gửi key thật)
+        keyStatuses[keyId] = 'success';
+        
+        // Trả về kết quả kèm thông tin key nào đã xử lý và trạng thái các key đã thử
         return res.status(200).json({
           ...data,
-          _keyUsed: i + 1 // Chỉ gửi số thứ tự key để frontend hiển thị chấm tròn
+          _keyUsed: keyId,
+          _keyStatuses: keyStatuses
         });
       }
 
-      // Nếu key bị rate limit (429), thử key tiếp theo
-      if (response.status === 429) {
-        lastError = `Key ${i + 1}: Rate limit exceeded (429)`;
-        console.warn(lastError);
-        continue; // Thử key tiếp theo
-      }
-
-      // Các lỗi khác (400, 403, v.v.), vẫn thử key tiếp theo
+      // Nếu key bị lỗi, đánh dấu lỗi và thử key tiếp theo trong danh sách xoay vòng
+      keyStatuses[keyId] = 'error';
       const errText = await response.text();
-      lastError = `Key ${i + 1}: HTTP ${response.status} - ${errText}`;
-      console.error(lastError);
-      continue;
+      lastError = `Key ${keyId}: HTTP ${response.status} - ${errText}`;
+      console.warn(lastError);
 
     } catch (error) {
-      lastError = `Key ${i + 1}: ${error.message}`;
+      keyStatuses[keyId] = 'error';
+      lastError = `Key ${keyId}: ${error.message}`;
       console.error(lastError);
-      continue;
     }
   }
 
   // Tất cả các key đều thất bại
   return res.status(429).json({
     error: 'ALL_KEYS_EXHAUSTED',
-    message: 'Tất cả API keys đều đang quá tải. Vui lòng thử lại sau 1 phút.'
+    message: 'Tất cả API keys đều đang quá tải. Vui lòng thử lại sau 1 phút.',
+    _keyStatuses: keyStatuses
   });
 }
