@@ -613,5 +613,14 @@
   display: none !important; /* Vô hiệu hóa overlay để lộ sản phẩm phía sau */
 }
 
+/* ===== SMOOTH SHIFT TO PREVENT OVERLAPPING PRODUCTS ===== */
+.products-section {
+  transition: padding-right 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+  will-change: padding-right;
+}
 
-
+@media (min-width: 769px) {
+  body.chatbox-is-open .products-section {
+    padding-right: 420px !important;
+  }
+}
