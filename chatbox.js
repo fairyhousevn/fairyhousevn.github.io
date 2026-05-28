@@ -43,12 +43,6 @@
       const dots = document.querySelectorAll(`.key-dot[data-key-id="${k.id}"]`);
       dots.forEach(dot => {
         dot.className = `key-dot ${k.status}`;
-        let statusVi = 'Đang chờ';
-        if (k.status === 'active') statusVi = 'Đang trả lời...';
-        else if (k.status === 'success') statusVi = 'Hoạt động tốt';
-        else if (k.status === 'error') statusVi = 'Bận / Quá tải';
-        
-        dot.setAttribute('title', `Key ${k.id} (${statusVi})\n- Đã dùng: ${k.totalCalls} lần\n- Lỗi: ${k.errors} lần`);
       });
     });
   }
@@ -153,11 +147,11 @@ ${productContext}`;
             </div>
           </div>
           <!-- Giao diện giám sát 4 key dạng chấm tròn chuyên nghiệp -->
-          <div class="key-monitor" id="keyMonitor" title="Trạng thái hệ thống xoay vòng key">
-            <span class="key-dot idle" data-key-id="1" title="Key 1: Đang chờ"></span>
-            <span class="key-dot idle" data-key-id="2" title="Key 2: Đang chờ"></span>
-            <span class="key-dot idle" data-key-id="3" title="Key 3: Đang chờ"></span>
-            <span class="key-dot idle" data-key-id="4" title="Key 4: Đang chờ"></span>
+          <div class="key-monitor" id="keyMonitor">
+            <span class="key-dot idle" data-key-id="1"></span>
+            <span class="key-dot idle" data-key-id="2"></span>
+            <span class="key-dot idle" data-key-id="3"></span>
+            <span class="key-dot idle" data-key-id="4"></span>
           </div>
           <button class="chatbox-header-close" id="chatboxClose" title="Đóng">✕</button>
         </div>
