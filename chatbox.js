@@ -515,8 +515,8 @@ ${productContext}`;
 
   // ===== GỌI API 9ROUTER TRỰC TIẾP =====
   async function callGemini(userMessage) {
-    let retries = 1; // Tổng cộng 2 lượt thử: 1 chính + 1 retry
-    const retryDelay = 5000; // Giãn cách 5 giây giữa các lượt thử để hệ thống/tunnel tự phục hồi
+    const MAX_ATTEMPTS = 30; // 90 giây / 3 giây = 30 lần gửi
+    const RETRY_INTERVAL = 3000; // 3 giây giữa mỗi lần gửi
 
     // 1. Tải cấu hình bảo mật nếu chưa có
     try {
@@ -529,6 +529,7 @@ ${productContext}`;
       return;
     }
 
+    // 2. Chuẩn bị request body
     const systemPrompt = buildSystemPrompt();
     const messages = [
       { role: 'system', content: systemPrompt }
@@ -549,60 +550,32 @@ ${productContext}`;
       stream: false
     };
 
-    while (retries >= 0) {
-      const attemptNumber = 2 - retries;
-      console.log(`[9Router API] Bắt đầu lượt thử ${attemptNumber}/2...`);
+    // 3. Gửi liên tục cứ 3 giây một lần, tổng 30 lần trong 90 giây
+    let requestCount = 0;
+    let lastError = null;
+
+    while (requestCount < MAX_ATTEMPTS) {
+      requestCount++;
+      console.log(`[9Router API] Lượt gửi ${requestCount}/${MAX_ATTEMPTS} (${requestCount * 3}s/${MAX_ATTEMPTS * 3}s)...`);
+
       try {
-        // Đảm bảo mỗi attempt đợi tối thiểu 60 giây trước khi báo lỗi
-        const startTime = Date.now();
-        const controller = new AbortController();
-
-        const fetchPromise = (async () => {
-          const response = await fetch(_ru, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${_rk}`
-            },
-            body: JSON.stringify(requestBody),
-            signal: controller.signal
-          });
-
-          if (!response.ok) {
-            const status = response.status;
-            const text = await response.text();
-            throw new Error(`HTTP ${status}: ${text}`);
-          }
-
-          return response;
-        })();
-
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => {
-            console.warn(`[9Router API] Lượt thử ${attemptNumber} vượt quá 60 giây! Đang hủy request...`);
-            controller.abort();
-            reject(new Error('Request timeout after 60 seconds'));
-          }, API_TIMEOUT_MS);
+        const response = await fetch(_ru, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${_rk}`
+          },
+          body: JSON.stringify(requestBody)
         });
 
-        let response;
-        try {
-          response = await Promise.race([fetchPromise, timeoutPromise]);
-        } catch (raceError) {
-          // Nếu Promise.race() fail, đảm bảo đã đợi ít nhất 60 giây
-          const elapsedTime = Date.now() - startTime;
-          const remainingWait = API_TIMEOUT_MS - elapsedTime;
-
-          if (remainingWait > 0) {
-            console.log(`[9Router API] Lượt thử ${attemptNumber} gặp lỗi sau ${elapsedTime}ms. Đợi thêm ${remainingWait}ms để đảm bảo tối thiểu 60 giây...`);
-            await new Promise(resolve => setTimeout(resolve, remainingWait));
-          }
-
-          throw raceError;
+        if (!response.ok) {
+          const status = response.status;
+          const text = await response.text();
+          throw new Error(`HTTP ${status}: ${text}`);
         }
 
         const rawText = await response.text();
-        console.log(`[9Router API] Phản hồi thô nhận được (Lượt thử ${attemptNumber}):`, rawText);
+        console.log(`[9Router API] ✅ Phản hồi nhận được (Lượt ${requestCount}):`, rawText);
 
         let aiText = '';
         let data = null;
@@ -697,34 +670,30 @@ ${productContext}`;
           throw new Error('Không thể trích xuất nội dung văn bản hợp lệ từ API.');
         }
 
-        // Lưu lịch sử chat
+        // ✅ THÀNH CÔNG! Lưu lịch sử chat và hiển thị kết quả
         chatHistory.push({ role: 'assistant', content: aiText });
-
-        // Tìm sản phẩm được nhắc tới
         const mentionedProducts = findMentionedProducts(aiText);
-
-        // Ẩn typing và hiển thị tin nhắn
         hideTyping();
         addMessage('ai', aiText, mentionedProducts);
-        return; // Thành công hoàn toàn, kết thúc vòng lặp
+        return; // Kết thúc hàm, không cần gửi lại
 
       } catch (error) {
-        console.warn(`[9Router API] Thất bại ở lượt thử ${attemptNumber} (còn ${retries} lượt thử lại):`, error);
+        lastError = error;
+        console.warn(`[9Router API] ❌ Lượt gửi ${requestCount} thất bại:`, error.message);
+      }
 
-        if (retries > 0) {
-          retries--;
-          console.log(`[9Router API] Gặp sự cố kết nối. Chờ đợi ${retryDelay / 1000} giây trước khi gửi lại lượt thử 2...`);
-          // Giữ typing indicator hiển thị trong suốt quá trình retry
-          await new Promise(resolve => setTimeout(resolve, retryDelay));
-        } else {
-          // Hết tất cả lượt thử lại, báo lỗi cho người dùng
-          hideTyping();
-          const errorMsg = 'Fairy gặp chút trục trặc kết nối rồi 😢 Bạn thử nhắn lại sau chút nhé! Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ ngay nha! 💕';
-          addMessage('error', errorMsg);
-          break;
-        }
+      // Nếu chưa hết số lần gửi, chờ 3 giây rồi gửi lại
+      if (requestCount < MAX_ATTEMPTS) {
+        console.log(`[9Router API] ⏳ Chờ 3 giây trước khi gửi lại...`);
+        await new Promise(resolve => setTimeout(resolve, RETRY_INTERVAL));
       }
     }
+
+    // ❌ HẾT 90 GIÂY (30 lần gửi), VẪN KHÔNG CÓ PHẢN HỒI → BÁO LỖI
+    console.error(`[9Router API] ❌ Đã gửi ${MAX_ATTEMPTS} lần trong 90 giây, vẫn không nhận được phản hồi từ 9Router.`);
+    hideTyping();
+    const errorMsg = 'Fairy gặp chút trục trặc kết nối rồi 😢 Bạn thử nhắn lại sau chút nhé! Hoặc liên hệ Zalo <a href="https://zalo.me/0378791667" target="_blank" style="color: #e6556f; font-weight: bold; text-decoration: underline;">0378 791 667</a> để được hỗ trợ ngay nha! 💕';
+    addMessage('error', errorMsg);
   }
 
   // ===== TÌM SẢN PHẨM ĐƯỢC MENTION =====
@@ -875,3 +844,4 @@ ${productContext}`;
   initChatbox();
 
 })();
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
