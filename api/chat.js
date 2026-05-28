@@ -103,7 +103,8 @@ export default async function handler(req, res) {
         return res.status(200).json({
           ...data,
           _keyUsed: keyId,
-          _keyStatuses: keyStatuses
+          _keyStatuses: keyStatuses,
+          _keyErrors: keyErrors
         });
       }
 
