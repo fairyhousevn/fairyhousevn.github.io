@@ -553,8 +553,8 @@ ${productContext}`;
       const attemptNumber = 2 - retries;
       console.log(`[9Router API] Bắt đầu lượt thử ${attemptNumber}/2...`);
       try {
-        // Wrap fetch trong Promise.race() với timeout để đảm bảo timeout luôn hoạt động
-        // ngay cả khi gặp lỗi network ngay lập tức
+        // Đảm bảo mỗi attempt đợi tối thiểu 60 giây trước khi báo lỗi
+        const startTime = Date.now();
         const controller = new AbortController();
 
         const fetchPromise = (async () => {
@@ -585,7 +585,21 @@ ${productContext}`;
           }, API_TIMEOUT_MS);
         });
 
-        const response = await Promise.race([fetchPromise, timeoutPromise]);
+        let response;
+        try {
+          response = await Promise.race([fetchPromise, timeoutPromise]);
+        } catch (raceError) {
+          // Nếu Promise.race() fail, đảm bảo đã đợi ít nhất 60 giây
+          const elapsedTime = Date.now() - startTime;
+          const remainingWait = API_TIMEOUT_MS - elapsedTime;
+
+          if (remainingWait > 0) {
+            console.log(`[9Router API] Lượt thử ${attemptNumber} gặp lỗi sau ${elapsedTime}ms. Đợi thêm ${remainingWait}ms để đảm bảo tối thiểu 60 giây...`);
+            await new Promise(resolve => setTimeout(resolve, remainingWait));
+          }
+
+          throw raceError;
+        }
 
         const rawText = await response.text();
         console.log(`[9Router API] Phản hồi thô nhận được (Lượt thử ${attemptNumber}):`, rawText);
