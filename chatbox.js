@@ -21,7 +21,7 @@
     label: `Key ${i + 1}`,
     totalCalls: 0,
     errors: 0,
-    status: 'idle' // 'idle' | 'active' | 'success' | 'error'
+    status: 'success' // Ban đầu cả 4 key đều xanh lá (sẵn sàng)
   }));
 
   // Cập nhật giao diện của 4 chấm tròn giám sát key
@@ -136,10 +136,10 @@ ${productContext}`;
           </div>
           <!-- Giao diện giám sát 4 key dạng chấm tròn chuyên nghiệp -->
           <div class="key-monitor" id="keyMonitor">
-            <span class="key-dot idle" data-key-id="1"></span>
-            <span class="key-dot idle" data-key-id="2"></span>
-            <span class="key-dot idle" data-key-id="3"></span>
-            <span class="key-dot idle" data-key-id="4"></span>
+            <span class="key-dot success" data-key-id="1"></span>
+            <span class="key-dot success" data-key-id="2"></span>
+            <span class="key-dot success" data-key-id="3"></span>
+            <span class="key-dot success" data-key-id="4"></span>
           </div>
           <button class="chatbox-header-close" id="chatboxClose" title="Đóng">✕</button>
         </div>
@@ -590,7 +590,7 @@ ${productContext}`;
 
       const data = await response.json();
 
-      // Cập nhật trạng thái của tất cả key dựa trên phản hồi của server
+      // Cập nhật trạng thái của các key được thử trong lượt này dựa trên phản hồi từ server
       const attemptedKeys = data._keyStatuses ? Object.keys(data._keyStatuses).map(Number) : [];
       
       keyStatus.forEach(k => {
@@ -601,13 +601,8 @@ ${productContext}`;
           if (status === 'success') {
             k.totalCalls++;
           }
-        } else {
-          // Nếu key không được thử trong lượt này, trả về trạng thái chờ (idle)
-          // Ngoại trừ trường hợp key đó đã được đánh dấu là lỗi (error) từ trước để người dùng theo dõi
-          if (k.status !== 'error') {
-            setKeyStatus(k.id, 'idle');
-          }
         }
+        // Các key không được thử trong lượt này sẽ giữ nguyên trạng thái cũ (không reset về idle)
       });
 
       // Xoay vòng key cho tin nhắn tiếp theo
