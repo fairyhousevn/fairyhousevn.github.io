@@ -8,7 +8,7 @@
   // ===== CẤU HÌNH 9ROUTER PROXY =====
   const NINE_ROUTER_KEY = "sk-50ed9f833897dfa8-314oks-2608b897";
   const NINE_ROUTER_MODEL = "chatboxweb";
-  const NINE_ROUTER_API_URL = "https://largely-sessions-blake-jose.trycloudflare.com/v1/chat/completions";
+  const NINE_ROUTER_API_URL = "https://rlf2des.abc-tunnel.us/v1/chat/completions";
   
   const MAX_HISTORY = 6; // Giới hạn context lịch sử chat
   const RATE_LIMIT_MS = 2000; // Khôi phục rate limit 2 giây vì 9Router có cơ chế xoay vòng miễn phí tốt
