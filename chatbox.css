@@ -57,25 +57,7 @@
   white-space: nowrap;
 }
 .chatbox-toggle.active {
-  width: 54px !important;
-  height: 54px !important;
-  border-radius: 50% !important;
-  padding: 0 !important;
-  justify-content: center !important;
-  background: linear-gradient(135deg, #ff4757, #e6556f) !important;
-  animation: none !important;
-  box-shadow: 0 4px 20px rgba(255, 71, 87, 0.4) !important;
-}
-.chatbox-toggle.active .toggle-icon,
-.chatbox-toggle.active .chatbox-toggle-text {
   display: none !important;
-}
-.chatbox-toggle.active::after {
-  content: '✕';
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: white;
-  animation: rotateIn 0.3s forwards;
 }
 @keyframes rotateIn {
   from { transform: rotate(0deg); }
@@ -117,7 +99,7 @@
 /* ===== CHATBOX WINDOW ===== */
 .chatbox-window {
   position: fixed;
-  bottom: 90px;
+  bottom: 24px;
   right: 24px;
   width: 380px;
   height: 520px;
