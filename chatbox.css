@@ -358,7 +358,7 @@
   width: 55px;
   height: 55px;
   border-radius: 8px;
-  object-fit: cover;
+  object-fit: contain;
   flex-shrink: 0;
   border: 1px solid #ffc2ce;
 }
